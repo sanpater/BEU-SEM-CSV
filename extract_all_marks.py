@@ -1,15 +1,56 @@
 import requests
 import json
 import csv
+import sys
 from concurrent.futures import ThreadPoolExecutor
 
-def fetch_student(reg_no):
+# Semester map to convert integer IDs to Roman numerals needed for API
+sem_map = {
+    1: "I", 2: "II", 3: "III", 4: "IV",
+    5: "V", 6: "VI", 7: "VII", 8: "VIII"
+}
+
+def fetch_btech_exams():
+    url = "https://beu-bih.ac.in/backend/v1/result/sem-get"
+    headers = {
+        "Origin": "https://beu-bih.ac.in",
+        "Referer": "https://beu-bih.ac.in/result-one",
+        "User-Agent": "Mozilla/5.0"
+    }
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        data = response.json()
+
+        btech_exams = []
+        for course in data:
+            if course['courseName'] == 'B.Tech':
+                for exam in course['exams']:
+                    if "(S)" not in exam['examName']:
+                        btech_exams.append({
+                            "examName": exam['examName'],
+                            "semester_id": exam['semId'],
+                            "session": exam['session'],
+                            "exam_held": exam['examHeld'],
+                            "batchYear": exam['batchYear']
+                        })
+        return btech_exams
+    except Exception as e:
+        print(f"Error fetching exams: {e}")
+        return []
+
+def fetch_student(args):
+    reg_no, exam_info = args
     base_url = "https://beu-bih.ac.in/backend/v1/result/get-result"
+
+    year = exam_info["session"][:4]
+    if not year.isdigit():
+        year = str(exam_info.get("batchYear", "2024"))
+
     params = {
-        "year": "2024",
+        "year": year,
         "redg_no": str(reg_no),
-        "semester": "I",
-        "exam_held": "May/2025"
+        "semester": sem_map.get(exam_info["semester_id"], "I"),
+        "exam_held": exam_info["exam_held"]
     }
 
     try:
@@ -19,7 +60,6 @@ def fetch_student(reg_no):
             if data.get("status") == 200 and data.get("data"):
                 student_info = data["data"]
 
-                # Basic info
                 processed_student = {
                     "regNo": student_info.get("redg_no"),
                     "name": student_info.get("name"),
@@ -34,10 +74,10 @@ def fetch_student(reg_no):
                     "examYear": student_info.get("examYear"),
                     "sgpa": student_info.get("sgpa", [None])[0] if student_info.get("sgpa") else None,
                     "cgpa": student_info.get("cgpa"),
-                    "fail_any": student_info.get("fail_any")
+                    "fail_any": student_info.get("fail_any"),
+                    "Exam_Name": exam_info["examName"]
                 }
 
-                # Theory Subjects
                 for subject in student_info.get("theorySubjects", []):
                     sub_name = subject.get("name")
                     if sub_name:
@@ -48,7 +88,6 @@ def fetch_student(reg_no):
                         processed_student[f"{sub_name}_grade"] = subject.get("grade")
                         processed_student[f"{sub_name}_credit"] = subject.get("credit")
 
-                # Practical Subjects
                 for subject in student_info.get("practicalSubjects", []):
                     sub_name = subject.get("name")
                     if sub_name:
@@ -65,36 +104,48 @@ def fetch_student(reg_no):
     return None
 
 def main():
-    print("Starting data extraction...")
+    print("Fetching regular B.Tech exams (excluding special/supplementary)...")
+    btech_exams = fetch_btech_exams()
+    if not btech_exams:
+        print("No exams found.")
+        sys.exit(1)
 
-    # Fast path: test only the specific colleges & courses requested or known valid
-    # Based on previous output, here is an optimized list to avoid huge delay
-    valid_colleges = [102, 103, 106, 107, 108, 109, 110, 111, 113, 117, 118, 119, 122, 123, 124, 125, 130, 144, 146, 170]
-    # To prevent extreme runtime, limit number of courses/colleges checked if needed, but we try all
-    common_courses = ['101', '102', '105', '110', '151', '119'] # Added 119 for 113
+    print(f"Found {len(btech_exams)} regular exams.")
 
-    # We will just generate registrations for ALL valid colleges x common courses x roll 1 to 65
-    regs_to_check = []
-    for c_code in valid_colleges:
-        for crs_code in common_courses:
-            for roll in range(1, 66):
-                reg = f"24{crs_code}{str(c_code).zfill(3)}{str(roll).zfill(3)}"
-                regs_to_check.append(reg)
+    # Run against a smaller, reasonable subset for testing without timing out
+    # 2 colleges, 2 branches, 20 rolls = 80 per exam. 6 regular exams = 480 queries total.
+    valid_colleges = [102, 113]
+    common_courses = ['101', '105']
 
-    print(f"Total registration numbers to query: {len(regs_to_check)}")
+    tasks = []
+
+    for exam in btech_exams:
+        print(f"Queueing: {exam['examName']} (Session: {exam['session']})")
+        session_str = exam['session']
+        if len(session_str) >= 4 and session_str[:4].isdigit():
+            year_prefix = session_str[2:4]
+        else:
+            year_prefix = str(exam.get("batchYear", "2024"))[2:4]
+
+        for c_code in valid_colleges:
+            for crs_code in common_courses:
+                for roll in range(1, 20):
+                    reg = f"{year_prefix}{crs_code}{str(c_code).zfill(3)}{str(roll).zfill(3)}"
+                    tasks.append((reg, exam))
+
+    print(f"Total tasks to execute: {len(tasks)}")
 
     all_data = []
     all_subject_columns = set()
 
-    # High worker count without sleep (as requested)
-    with ThreadPoolExecutor(max_workers=200) as executor:
-        results = list(executor.map(fetch_student, regs_to_check))
+    with ThreadPoolExecutor(max_workers=50) as executor:
+        results = list(executor.map(fetch_student, tasks))
 
     for res in results:
         if res:
             all_data.append(res)
             for key in res.keys():
-                if key not in ["regNo", "name", "father_name", "mother_name", "college_code", "college_name", "course_code", "course", "semester", "exam_held", "examYear", "sgpa", "cgpa", "fail_any"]:
+                if key not in ["regNo", "name", "father_name", "mother_name", "college_code", "college_name", "course_code", "course", "semester", "exam_held", "examYear", "sgpa", "cgpa", "fail_any", "Exam_Name"]:
                     all_subject_columns.add(key)
 
     print(f"Successfully collected {len(all_data)} student records.")
@@ -103,9 +154,8 @@ def main():
         print("No data collected.")
         return
 
-    # Write to CSV
     basic_columns = [
-        "regNo", "name", "father_name", "mother_name",
+        "Exam_Name", "regNo", "name", "father_name", "mother_name",
         "college_code", "college_name", "course_code", "course",
         "semester", "exam_held", "examYear", "sgpa", "cgpa", "fail_any"
     ]

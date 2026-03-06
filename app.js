@@ -80,7 +80,7 @@ function updateThemeIcon(theme) {
 function loadCSVData() {
     loading.classList.remove('d-none');
 
-    Papa.parse('all_student_marks.csv', {
+Papa.parse('all_student_marks.csv', {
         download: true,
         header: true,
         skipEmptyLines: true,
