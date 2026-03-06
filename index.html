@@ -8,44 +8,104 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-light">
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="#">
-                <i class="fas fa-graduation-cap me-2"></i> BEU Marks Portal
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="#">
+                <div class="bg-white text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                    <i class="fas fa-university fs-5"></i>
+                </div>
+                BEU Marks Portal
             </a>
+            <button class="btn btn-outline-light rounded-pill btn-sm d-flex align-items-center gap-2" id="themeToggle">
+                <i class="fas fa-moon"></i> <span>Dark Mode</span>
+            </button>
         </div>
     </nav>
 
-    <div class="container mt-4">
-        <!-- Dashboard Header -->
+    <div class="container mt-4 main-content">
+
+        <!-- Statistics Dashboard -->
+        <div class="row mb-4 g-3" id="statsDashboard">
+            <div class="col-md-4">
+                <div class="card stat-card shadow-sm border-0 h-100 bg-gradient-primary text-white">
+                    <div class="card-body p-4 d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="mb-1 text-white-50 text-uppercase fw-bold small">Total Students</p>
+                            <h2 class="mb-0 fw-bold display-5" id="statTotal">0</h2>
+                        </div>
+                        <div class="fs-1 opacity-50"><i class="fas fa-users"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stat-card shadow-sm border-0 h-100 bg-gradient-success text-white">
+                    <div class="card-body p-4 d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="mb-1 text-white-50 text-uppercase fw-bold small">Pass Rate</p>
+                            <h2 class="mb-0 fw-bold display-5" id="statPassRate">0%</h2>
+                        </div>
+                        <div class="fs-1 opacity-50"><i class="fas fa-chart-pie"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stat-card shadow-sm border-0 h-100 bg-gradient-info text-white">
+                    <div class="card-body p-4 d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="mb-1 text-white-50 text-uppercase fw-bold small">Avg SGPA</p>
+                            <h2 class="mb-0 fw-bold display-5" id="statAvgSgpa">0.00</h2>
+                        </div>
+                        <div class="fs-1 opacity-50"><i class="fas fa-award"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Controls -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card shadow-sm border-0">
-                    <div class="card-body p-4 bg-white rounded">
-                        <h2 class="h4 mb-3 text-primary"><i class="fas fa-search me-2"></i> Find Your Results</h2>
+                <div class="card shadow-sm border-0 filter-card">
+                    <div class="card-body p-4 rounded">
+                        <div class="d-flex align-items-center mb-3">
+                            <h5 class="mb-0 text-primary fw-bold"><i class="fas fa-filter me-2"></i> Find Your Results</h5>
+                        </div>
                         <div class="row g-3">
                             <div class="col-md-3">
-                                <label class="form-label text-muted small fw-bold">Registration No.</label>
-                                <input type="text" id="searchInput" class="form-control" placeholder="e.g. 24110113031">
+                                <label class="form-label text-muted small fw-bold">Search (Reg No / Name)</label>
+                                <div class="input-group input-group-sm-custom shadow-sm">
+                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-search"></i></span>
+                                    <input type="text" id="searchInput" class="form-control border-start-0 ps-0" placeholder="e.g. 24110113031">
+                                </div>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label text-muted small fw-bold">Filter by College</label>
-                                <select id="collegeFilter" class="form-select">
+                            <div class="col-md-3">
+                                <label class="form-label text-muted small fw-bold">College</label>
+                                <select id="collegeFilter" class="form-select shadow-sm">
                                     <option value="">All Colleges</option>
                                 </select>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label text-muted small fw-bold">Filter by Branch</label>
-                                <select id="branchFilter" class="form-select">
+                            <div class="col-md-3">
+                                <label class="form-label text-muted small fw-bold">Branch / Course</label>
+                                <select id="branchFilter" class="form-select shadow-sm">
                                     <option value="">All Branches</option>
                                 </select>
                             </div>
+                            <div class="col-md-2">
+                                <label class="form-label text-muted small fw-bold">Sort By</label>
+                                <select id="sortFilter" class="form-select shadow-sm">
+                                    <option value="name_asc">Name (A-Z)</option>
+                                    <option value="sgpa_desc">Highest SGPA</option>
+                                    <option value="sgpa_asc">Lowest SGPA</option>
+                                </select>
+                            </div>
                             <div class="col-md-1 d-flex align-items-end">
-                                <button id="searchBtn" class="btn btn-primary w-100"><i class="fas fa-search"></i></button>
+                                <button id="searchBtn" class="btn btn-primary w-100 shadow-sm fw-bold"><i class="fas fa-check"></i></button>
                             </div>
                         </div>
                     </div>
@@ -55,32 +115,36 @@
 
         <!-- Loading Spinner -->
         <div id="loading" class="text-center py-5 d-none">
-            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <div class="spinner-grow text-primary" role="status" style="width: 3rem; height: 3rem;">
                 <span class="visually-hidden">Loading...</span>
             </div>
-            <p class="mt-2 text-muted">Loading massive student database...</p>
+            <p class="mt-3 text-muted fw-bold">Loading massive student database...</p>
         </div>
 
         <!-- Error Message -->
-        <div id="errorMsg" class="alert alert-danger d-none shadow-sm" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i> <span id="errorText"></span>
+        <div id="errorMsg" class="alert alert-danger d-none shadow-sm align-items-center" role="alert">
+            <i class="fas fa-exclamation-triangle fs-4 me-3"></i>
+            <div>
+                <h6 class="mb-0 fw-bold">Error</h6>
+                <span id="errorText" class="small"></span>
+            </div>
         </div>
 
         <!-- Results Area -->
-        <div id="resultsArea" class="row">
+        <div id="resultsArea" class="row g-4 mb-4">
             <!-- Student cards will be injected here -->
         </div>
 
         <!-- Pagination -->
         <nav aria-label="Page navigation" class="mt-4 mb-5" id="paginationNav" style="display: none;">
-            <ul class="pagination justify-content-center" id="paginationList">
+            <ul class="pagination pagination-lg justify-content-center shadow-sm" id="paginationList">
                 <!-- Pagination injected here -->
             </ul>
         </nav>
 
-        <!-- Stats summary -->
-        <div class="text-center text-muted mb-5 small">
-            <span id="totalRecords">0</span> records loaded.
+        <!-- Footer Info -->
+        <div class="text-center text-muted mb-5 small pb-4">
+            Data sourced from BEU API &bull; <span id="totalRecords" class="fw-bold text-primary">0</span> records loaded.
         </div>
 
     </div>
@@ -88,10 +152,23 @@
     <!-- Student Detail Modal -->
     <div class="modal fade" id="studentModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title fw-bold" id="modalTitle">Student Marksheet</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-primary text-white border-0 py-3">
+                    <div class="d-flex align-items-center gap-3 w-100">
+                        <div class="bg-white text-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 45px; height: 45px; font-size: 1.2rem;">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold mb-0" id="modalTitle">Student Marksheet</h5>
+                            <small class="opacity-75">Digital Academic Record</small>
+                        </div>
+                        <div class="ms-auto d-flex gap-2">
+                            <button class="btn btn-sm btn-light text-primary rounded-pill px-3 shadow-sm print-btn" onclick="window.print()">
+                                <i class="fas fa-print me-1"></i> Print
+                            </button>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-body p-0" id="modalBody">
                     <!-- Detail injected here -->
@@ -101,7 +178,6 @@
     </div>
 
     <!-- Scripts -->
-    <!-- PapaParse for parsing CSV directly in browser -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="app.js"></script>
