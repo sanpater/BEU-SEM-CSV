@@ -168,15 +168,33 @@ def main():
         filename = f"{start_year_str}_sem{sem_id}.csv"
 
         import os
-        # Use 'a' append mode if file already exists in case we process multiple exams for same semester
+        import csv
+
         file_exists = os.path.isfile(filename)
 
-        with open(filename, 'a' if file_exists else 'w', newline='', encoding='utf-8') as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=all_columns)
-            if not file_exists:
+        if file_exists:
+            # If the file already exists, we must merge headers to avoid corruption
+            existing_data = []
+            existing_headers = []
+            with open(filename, 'r', newline='', encoding='utf-8') as infile:
+                reader = csv.DictReader(infile)
+                existing_headers = reader.fieldnames if reader.fieldnames else []
+                existing_data = list(reader)
+
+            merged_headers = list(dict.fromkeys(existing_headers + all_columns))
+            merged_data = existing_data + all_data
+
+            with open(filename, 'w', newline='', encoding='utf-8') as outfile:
+                writer = csv.DictWriter(outfile, fieldnames=merged_headers)
                 writer.writeheader()
-            for row in all_data:
-                writer.writerow(row)
+                for row in merged_data:
+                    writer.writerow(row)
+        else:
+            with open(filename, 'w', newline='', encoding='utf-8') as outfile:
+                writer = csv.DictWriter(outfile, fieldnames=all_columns)
+                writer.writeheader()
+                for row in all_data:
+                    writer.writerow(row)
 
         print(f"Saved records to {filename}")
 
