@@ -84,55 +84,75 @@ function updateThemeIcon(theme) {
 let indexData = [];
 let currentCsvFile = "";
 
+// Define all possible standard B.Tech batches and semesters
+const KNOWN_BATCHES = ["2020", "2021", "2022", "2023", "2024", "2025"];
+const KNOWN_SEMESTERS = ["1", "2", "3", "4", "5", "6", "7", "8"];
+
 async function loadCSVData() {
     loading.classList.remove('d-none');
-    try {
-        const res = await fetch('index.json');
-        if(!res.ok) throw new Error("Index not found");
-        indexData = await res.json();
 
-        populateBatchSemesterDropdowns();
+    // Auto-generate indexData based on known combinations so index.json isn't strictly required
+    indexData = [];
+    KNOWN_BATCHES.forEach(b => {
+        KNOWN_SEMESTERS.forEach(s => {
+            indexData.push({ batch: b, semester: s, file: `${b}_sem${s}.csv` });
+        });
+    });
 
-        // Load default context if possible
-        if(indexData.length > 0) {
-            batchFilter.value = indexData[0].batch;
-            semesterFilter.value = indexData[0].semester;
-            await loadSpecificCSV(indexData[0].file);
-        } else {
-            loading.classList.add('d-none');
-            showError("No data found in index.json");
-        }
-    } catch(err) {
-        loading.classList.add('d-none');
-        showError("Could not load database file. Please run the Python script first.");
-        console.error(err);
-    }
+    // Sort index data by batch descending, then semester ascending
+    indexData.sort((a,b) => {
+        if(b.batch !== a.batch) return b.batch.localeCompare(a.batch);
+        return parseInt(a.semester) - parseInt(b.semester);
+    });
+
+    populateBatchSemesterDropdowns();
+
+    // Load default context (usually the most recent data uploaded, like 2024 Sem 1 or 2021 Sem 8)
+    // We will attempt to load a few known valid defaults or just the top of the list.
+    batchFilter.value = "2024";
+    semesterFilter.value = "1";
+    await loadSpecificCSV("2024_sem1.csv");
 }
 
 async function handleFilterChange() {
     const batch = batchFilter.value;
     const sem = semesterFilter.value;
 
-    // Find the corresponding CSV file
-    const match = indexData.find(item => item.batch === batch && item.semester === sem);
-    if (match) {
-        if(match.file !== currentCsvFile) {
-            await loadSpecificCSV(match.file);
-        } else {
-            applyFilters();
-        }
+    const filename = `${batch}_sem${sem}.csv`;
+    if(filename !== currentCsvFile) {
+        await loadSpecificCSV(filename);
     } else {
-        allData = [];
-        filteredData = [];
-        updateStats();
-        renderPage(1);
+        applyFilters();
     }
 }
 
 async function loadSpecificCSV(filename) {
     loading.classList.remove('d-none');
+    errorMsg.classList.add('d-none');
     resultsArea.innerHTML = '';
     currentCsvFile = filename;
+
+    // Check if file exists via fetch before Papa Parse
+    try {
+        const check = await fetch(filename, { method: 'HEAD' });
+        if (!check.ok) {
+            throw new Error(`File ${filename} not found on server.`);
+        }
+    } catch(err) {
+        loading.classList.add('d-none');
+        allData = [];
+        filteredData = [];
+        updateStats();
+        renderPage(1);
+
+        // Show a friendly message instead of a harsh error if the file is just missing
+        resultsArea.innerHTML = `<div class="col-12 text-center py-5">
+            <i class="fas fa-folder-open fs-1 text-muted opacity-50 mb-3"></i>
+            <h5 class="text-muted fw-bold">No Records Found</h5>
+            <p class="text-muted small">Data for this Batch and Semester (${filename}) has not been uploaded yet.</p>
+        </div>`;
+        return;
+    }
 
     Papa.parse(filename, {
         download: true,
@@ -157,7 +177,7 @@ async function loadSpecificCSV(filename) {
         },
         error: function(err) {
             loading.classList.add('d-none');
-            showError(`Failed to load data for ${filename}`);
+            showError(`Failed to parse data for ${filename}. Ensure the CSV is valid.`);
             console.error(err);
             allData = [];
             applyFilters();
