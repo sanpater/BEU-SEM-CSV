@@ -1,33 +1,21 @@
 import requests
 import json
 import csv
-import time
+from concurrent.futures import ThreadPoolExecutor
 
-def fetch_data():
+def fetch_student(reg_no):
     base_url = "https://beu-bih.ac.in/backend/v1/result/get-result"
+    params = {
+        "year": "2024",
+        "redg_no": str(reg_no),
+        "semester": "I",
+        "exam_held": "May/2025"
+    }
 
-    all_student_data = []
-    all_subject_columns = set()
-
-    start_reg = 24110113001
-    end_reg = 24110113060
-
-    # We create a session to reuse connections and be faster
-    session = requests.Session()
-
-    for reg_no in range(start_reg, end_reg + 1):
-        params = {
-            "year": "2024",
-            "redg_no": str(reg_no),
-            "semester": "I",
-            "exam_held": "May/2025"
-        }
-
-        try:
-            response = session.get(base_url, params=params)
-            response.raise_for_status()
+    try:
+        response = requests.get(base_url, params=params, timeout=5)
+        if response.status_code == 200:
             data = response.json()
-
             if data.get("status") == 200 and data.get("data"):
                 student_info = data["data"]
 
@@ -60,13 +48,6 @@ def fetch_data():
                         processed_student[f"{sub_name}_grade"] = subject.get("grade")
                         processed_student[f"{sub_name}_credit"] = subject.get("credit")
 
-                        all_subject_columns.add(f"{sub_name}_code")
-                        all_subject_columns.add(f"{sub_name}_ese")
-                        all_subject_columns.add(f"{sub_name}_ia")
-                        all_subject_columns.add(f"{sub_name}_total")
-                        all_subject_columns.add(f"{sub_name}_grade")
-                        all_subject_columns.add(f"{sub_name}_credit")
-
                 # Practical Subjects
                 for subject in student_info.get("practicalSubjects", []):
                     sub_name = subject.get("name")
@@ -78,22 +59,49 @@ def fetch_data():
                         processed_student[f"{sub_name}_grade"] = subject.get("grade")
                         processed_student[f"{sub_name}_credit"] = subject.get("credit")
 
-                        all_subject_columns.add(f"{sub_name}_code")
-                        all_subject_columns.add(f"{sub_name}_ese")
-                        all_subject_columns.add(f"{sub_name}_ia")
-                        all_subject_columns.add(f"{sub_name}_total")
-                        all_subject_columns.add(f"{sub_name}_grade")
-                        all_subject_columns.add(f"{sub_name}_credit")
+                return processed_student
+    except Exception as e:
+        pass
+    return None
 
-                all_student_data.append(processed_student)
-                print(f"Successfully fetched data for {reg_no}")
-            else:
-                print(f"Failed or no data for {reg_no}: {data.get('message')}")
-        except Exception as e:
-            print(f"Error fetching data for {reg_no}: {e}")
+def main():
+    print("Starting data extraction...")
 
-        # Optional small sleep to be nice to the server
-        time.sleep(0.1)
+    # Fast path: test only the specific colleges & courses requested or known valid
+    # Based on previous output, here is an optimized list to avoid huge delay
+    valid_colleges = [102, 103, 106, 107, 108, 109, 110, 111, 113, 117, 118, 119, 122, 123, 124, 125, 130, 144, 146, 170]
+    # To prevent extreme runtime, limit number of courses/colleges checked if needed, but we try all
+    common_courses = ['101', '102', '105', '110', '151', '119'] # Added 119 for 113
+
+    # We will just generate registrations for ALL valid colleges x common courses x roll 1 to 65
+    regs_to_check = []
+    for c_code in valid_colleges:
+        for crs_code in common_courses:
+            for roll in range(1, 66):
+                reg = f"24{crs_code}{str(c_code).zfill(3)}{str(roll).zfill(3)}"
+                regs_to_check.append(reg)
+
+    print(f"Total registration numbers to query: {len(regs_to_check)}")
+
+    all_data = []
+    all_subject_columns = set()
+
+    # High worker count without sleep (as requested)
+    with ThreadPoolExecutor(max_workers=200) as executor:
+        results = list(executor.map(fetch_student, regs_to_check))
+
+    for res in results:
+        if res:
+            all_data.append(res)
+            for key in res.keys():
+                if key not in ["regNo", "name", "father_name", "mother_name", "college_code", "college_name", "course_code", "course", "semester", "exam_held", "examYear", "sgpa", "cgpa", "fail_any"]:
+                    all_subject_columns.add(key)
+
+    print(f"Successfully collected {len(all_data)} student records.")
+
+    if not all_data:
+        print("No data collected.")
+        return
 
     # Write to CSV
     basic_columns = [
@@ -102,26 +110,16 @@ def fetch_data():
         "semester", "exam_held", "examYear", "sgpa", "cgpa", "fail_any"
     ]
 
-    # Sort subject columns for consistent ordering
     sorted_subject_columns = sorted(list(all_subject_columns))
-
     all_columns = basic_columns + sorted_subject_columns
 
-    # Check if there is any data
-    if not all_student_data:
-        print("No student data was collected.")
-        return
-
-    with open('student_marks.csv', 'w', newline='', encoding='utf-8') as csvfile:
+    with open('all_student_marks.csv', 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=all_columns)
         writer.writeheader()
-        for row in all_student_data:
-            # Only write fields that exist in all_columns (which should be all of them)
-            # using writerow directly expects all keys in row to be in fieldnames,
-            # which is true here because we add all subjects to all_subject_columns
+        for row in all_data:
             writer.writerow(row)
 
-    print(f"Data extracted to student_marks.csv with {len(all_student_data)} records.")
+    print("Saved all records to all_student_marks.csv")
 
 if __name__ == "__main__":
-    fetch_data()
+    main()

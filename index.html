@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BEU Student Marks Digital Portal</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">
+                <i class="fas fa-graduation-cap me-2"></i> BEU Marks Portal
+            </a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Dashboard Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4 bg-white rounded">
+                        <h2 class="h4 mb-3 text-primary"><i class="fas fa-search me-2"></i> Find Your Results</h2>
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label text-muted small fw-bold">Registration No.</label>
+                                <input type="text" id="searchInput" class="form-control" placeholder="e.g. 24110113031">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label text-muted small fw-bold">Filter by College</label>
+                                <select id="collegeFilter" class="form-select">
+                                    <option value="">All Colleges</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label text-muted small fw-bold">Filter by Branch</label>
+                                <select id="branchFilter" class="form-select">
+                                    <option value="">All Branches</option>
+                                </select>
+                            </div>
+                            <div class="col-md-1 d-flex align-items-end">
+                                <button id="searchBtn" class="btn btn-primary w-100"><i class="fas fa-search"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loading" class="text-center py-5 d-none">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted">Loading massive student database...</p>
+        </div>
+
+        <!-- Error Message -->
+        <div id="errorMsg" class="alert alert-danger d-none shadow-sm" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i> <span id="errorText"></span>
+        </div>
+
+        <!-- Results Area -->
+        <div id="resultsArea" class="row">
+            <!-- Student cards will be injected here -->
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="Page navigation" class="mt-4 mb-5" id="paginationNav" style="display: none;">
+            <ul class="pagination justify-content-center" id="paginationList">
+                <!-- Pagination injected here -->
+            </ul>
+        </nav>
+
+        <!-- Stats summary -->
+        <div class="text-center text-muted mb-5 small">
+            <span id="totalRecords">0</span> records loaded.
+        </div>
+
+    </div>
+
+    <!-- Student Detail Modal -->
+    <div class="modal fade" id="studentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold" id="modalTitle">Student Marksheet</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0" id="modalBody">
+                    <!-- Detail injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <!-- PapaParse for parsing CSV directly in browser -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
