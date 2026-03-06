@@ -6,6 +6,8 @@ let currentChart = null;
 
 // Elements
 const searchInput = document.getElementById('searchInput');
+const batchFilter = document.getElementById('batchFilter');
+const semesterFilter = document.getElementById('semesterFilter');
 const collegeFilter = document.getElementById('collegeFilter');
 const branchFilter = document.getElementById('branchFilter');
 const sortFilter = document.getElementById('sortFilter');
@@ -34,6 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput.addEventListener('keyup', (e) => {
         if(e.key === 'Enter') applyFilters();
     });
+    batchFilter.addEventListener('change', applyFilters);
+    semesterFilter.addEventListener('change', applyFilters);
     collegeFilter.addEventListener('change', applyFilters);
     branchFilter.addEventListener('change', applyFilters);
     sortFilter.addEventListener('change', applyFilters);
@@ -144,12 +148,30 @@ function updateStats() {
 }
 
 function populateFilters() {
+    const batches = new Set();
+    const semesters = new Set();
     const colleges = new Set();
     const branches = new Set();
 
     allData.forEach(row => {
+        if(row.Session) batches.add(row.Session);
+        if(row.semester) semesters.add(row.semester);
         if(row.college_name) colleges.add(row.college_name);
         if(row.course) branches.add(row.course);
+    });
+
+    Array.from(batches).sort().forEach(b => {
+        const opt = document.createElement('option');
+        opt.value = b; opt.textContent = b;
+        batchFilter.appendChild(opt);
+    });
+
+    // Roman numeral sort helper
+    const romanMap = { "I": 1, "II": 2, "III": 3, "IV": 4, "V": 5, "VI": 6, "VII": 7, "VIII": 8 };
+    Array.from(semesters).sort((a, b) => (romanMap[a] || 99) - (romanMap[b] || 99)).forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s; opt.textContent = s;
+        semesterFilter.appendChild(opt);
     });
 
     Array.from(colleges).sort().forEach(c => {
@@ -167,18 +189,30 @@ function populateFilters() {
 
 function applyFilters() {
     const term = searchInput.value.toLowerCase().trim();
+    const batch = batchFilter.value;
+    const semester = semesterFilter.value;
     const college = collegeFilter.value;
     const branch = branchFilter.value;
+
+    // Check if the search term looks like a registration number (e.g. 24110113031)
+    // If it's a specific reg number, we ignore dropdown filters to show ALL their semesters.
+    const isRegSearch = /^\d{10,}$/.test(term);
 
     filteredData = allData.filter(row => {
         const matchSearch = term === '' ||
                             (row.regNo && row.regNo.toLowerCase().includes(term)) ||
                             (row.name && row.name.toLowerCase().includes(term));
 
+        if (isRegSearch && term !== '') {
+            return matchSearch; // Return early, ignoring other filters for this student
+        }
+
+        const matchBatch = batch === '' || row.Session === batch;
+        const matchSemester = semester === '' || row.semester === semester;
         const matchCollege = college === '' || row.college_name === college;
         const matchBranch = branch === '' || row.course === branch;
 
-        return matchSearch && matchCollege && matchBranch;
+        return matchSearch && matchBatch && matchSemester && matchCollege && matchBranch;
     });
 
     sortData();

@@ -84,20 +84,32 @@
                                     <input type="text" id="searchInput" class="form-control border-start-0 ps-0" placeholder="e.g. 24110113031">
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
+                                <label class="form-label text-muted small fw-bold">Batch (Session)</label>
+                                <select id="batchFilter" class="form-select shadow-sm">
+                                    <option value="">All Batches</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label text-muted small fw-bold">Semester</label>
+                                <select id="semesterFilter" class="form-select shadow-sm">
+                                    <option value="">All Semesters</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
                                 <label class="form-label text-muted small fw-bold">College</label>
                                 <select id="collegeFilter" class="form-select shadow-sm">
                                     <option value="">All Colleges</option>
                                 </select>
                             </div>
-                            <div class="col-md-3">
-                                <label class="form-label text-muted small fw-bold">Branch / Course</label>
+                            <div class="col-md-2">
+                                <label class="form-label text-muted small fw-bold">Branch</label>
                                 <select id="branchFilter" class="form-select shadow-sm">
                                     <option value="">All Branches</option>
                                 </select>
                             </div>
-                            <div class="col-md-2">
-                                <label class="form-label text-muted small fw-bold">Sort By</label>
+                            <div class="col-md-1">
+                                <label class="form-label text-muted small fw-bold">Sort</label>
                                 <select id="sortFilter" class="form-select shadow-sm">
                                     <option value="name_asc">Name (A-Z)</option>
                                     <option value="sgpa_desc">Highest SGPA</option>

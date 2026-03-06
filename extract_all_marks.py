@@ -54,7 +54,7 @@ def fetch_student(args):
     }
 
     try:
-        response = requests.get(base_url, params=params, timeout=5)
+        response = requests.get(base_url, params=params, timeout=10)
         if response.status_code == 200:
             data = response.json()
             if data.get("status") == 200 and data.get("data"):
@@ -75,7 +75,8 @@ def fetch_student(args):
                     "sgpa": student_info.get("sgpa", [None])[0] if student_info.get("sgpa") else None,
                     "cgpa": student_info.get("cgpa"),
                     "fail_any": student_info.get("fail_any"),
-                    "Exam_Name": exam_info["examName"]
+                    "Exam_Name": exam_info["examName"],
+                    "Session": exam_info["session"]
                 }
 
                 for subject in student_info.get("theorySubjects", []):
@@ -112,10 +113,10 @@ def main():
 
     print(f"Found {len(btech_exams)} regular exams.")
 
-    # Run against a smaller, reasonable subset for testing without timing out
-    # 2 colleges, 2 branches, 20 rolls = 80 per exam. 6 regular exams = 480 queries total.
-    valid_colleges = [102, 113]
-    common_courses = ['101', '105']
+    # We will search a very broad range of colleges and courses to capture almost all students.
+    # Note: Scanning this large of a range will take several minutes.
+    valid_colleges = list(range(101, 175))
+    common_courses = ['101', '102', '103', '104', '105', '106', '107', '108', '109', '110', '111', '112', '113', '119', '151']
 
     tasks = []
 
@@ -129,7 +130,7 @@ def main():
 
         for c_code in valid_colleges:
             for crs_code in common_courses:
-                for roll in range(1, 20):
+                for roll in range(1, 65): # Broad roll numbers
                     reg = f"{year_prefix}{crs_code}{str(c_code).zfill(3)}{str(roll).zfill(3)}"
                     tasks.append((reg, exam))
 
@@ -138,14 +139,15 @@ def main():
     all_data = []
     all_subject_columns = set()
 
-    with ThreadPoolExecutor(max_workers=50) as executor:
+    # Process aggressively in the background.
+    with ThreadPoolExecutor(max_workers=500) as executor:
         results = list(executor.map(fetch_student, tasks))
 
     for res in results:
         if res:
             all_data.append(res)
             for key in res.keys():
-                if key not in ["regNo", "name", "father_name", "mother_name", "college_code", "college_name", "course_code", "course", "semester", "exam_held", "examYear", "sgpa", "cgpa", "fail_any", "Exam_Name"]:
+                if key not in ["Session", "Exam_Name", "regNo", "name", "father_name", "mother_name", "college_code", "college_name", "course_code", "course", "semester", "exam_held", "examYear", "sgpa", "cgpa", "fail_any"]:
                     all_subject_columns.add(key)
 
     print(f"Successfully collected {len(all_data)} student records.")
@@ -155,7 +157,7 @@ def main():
         return
 
     basic_columns = [
-        "Exam_Name", "regNo", "name", "father_name", "mother_name",
+        "Session", "Exam_Name", "regNo", "name", "father_name", "mother_name",
         "college_code", "college_name", "course_code", "course",
         "semester", "exam_held", "examYear", "sgpa", "cgpa", "fail_any"
     ]
