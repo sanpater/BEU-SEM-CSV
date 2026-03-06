@@ -82,6 +82,15 @@ def get_btech_exams():
 def main():
     print("Starting data extraction...")
 
+    # Clean up existing batch CSVs before running
+    import glob
+    import os
+    for csv_file in glob.glob("*_sem*.csv"):
+        try:
+            os.remove(csv_file)
+        except OSError:
+            pass
+
     btech_exams = get_btech_exams()
     if not btech_exams:
         print("No B.Tech exams found.")
@@ -170,6 +179,28 @@ def main():
                 writer.writerow(row)
 
         print(f"Saved records to {filename}")
+
+    # Generate an index.json of all generated CSVs for the web UI
+    print("Generating index.json for web UI...")
+    index_data = []
+    import glob
+    for csv_file in glob.glob("*_sem*.csv"):
+        parts = csv_file.replace(".csv", "").split("_sem")
+        if len(parts) == 2:
+            batch = parts[0]
+            sem = parts[1]
+            index_data.append({
+                "file": csv_file,
+                "batch": batch,
+                "semester": sem
+            })
+
+    # Sort index data by batch descending, then semester ascending
+    index_data.sort(key=lambda x: (-int(x["batch"]) if x["batch"].isdigit() else 0, int(x["semester"]) if x["semester"].isdigit() else 0))
+
+    with open("index.json", "w", encoding="utf-8") as f:
+        json.dump(index_data, f, indent=4)
+    print("Saved index.json")
 
 if __name__ == "__main__":
     main()

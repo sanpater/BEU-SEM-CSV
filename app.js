@@ -36,8 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput.addEventListener('keyup', (e) => {
         if(e.key === 'Enter') applyFilters();
     });
-    batchFilter.addEventListener('change', applyFilters);
-    semesterFilter.addEventListener('change', applyFilters);
+    batchFilter.addEventListener('change', handleFilterChange);
+    semesterFilter.addEventListener('change', handleFilterChange);
     collegeFilter.addEventListener('change', applyFilters);
     branchFilter.addEventListener('change', applyFilters);
     sortFilter.addEventListener('change', applyFilters);
@@ -81,10 +81,60 @@ function updateThemeIcon(theme) {
     }
 }
 
-function loadCSVData() {
-    loading.classList.remove('d-none');
+let indexData = [];
+let currentCsvFile = "";
 
-Papa.parse('all_student_marks.csv', {
+async function loadCSVData() {
+    loading.classList.remove('d-none');
+    try {
+        const res = await fetch('index.json');
+        if(!res.ok) throw new Error("Index not found");
+        indexData = await res.json();
+
+        populateBatchSemesterDropdowns();
+
+        // Load default context if possible
+        if(indexData.length > 0) {
+            batchFilter.value = indexData[0].batch;
+            semesterFilter.value = indexData[0].semester;
+            await loadSpecificCSV(indexData[0].file);
+        } else {
+            loading.classList.add('d-none');
+            showError("No data found in index.json");
+        }
+    } catch(err) {
+        loading.classList.add('d-none');
+        showError("Could not load database file. Please run the Python script first.");
+        console.error(err);
+    }
+}
+
+async function handleFilterChange() {
+    const batch = batchFilter.value;
+    const sem = semesterFilter.value;
+
+    // Find the corresponding CSV file
+    const match = indexData.find(item => item.batch === batch && item.semester === sem);
+    if (match) {
+        if(match.file !== currentCsvFile) {
+            await loadSpecificCSV(match.file);
+        } else {
+            applyFilters();
+        }
+    } else {
+        allData = [];
+        filteredData = [];
+        updateStats();
+        renderPage(1);
+    }
+}
+
+async function loadSpecificCSV(filename) {
+    loading.classList.remove('d-none');
+    resultsArea.innerHTML = '';
+    currentCsvFile = filename;
+
+    Papa.parse(filename, {
         download: true,
         header: true,
         skipEmptyLines: true,
@@ -98,20 +148,19 @@ Papa.parse('all_student_marks.csv', {
 
             totalRecords.textContent = allData.length;
 
-            // Populate filters
-            populateFilters();
+            // Populate secondary filters
+            populateSecondaryFilters();
 
             // Initial render
-            filteredData = [...allData];
-            updateStats();
-            sortData();
-            renderPage(1);
-
+            applyFilters();
             loading.classList.add('d-none');
         },
         error: function(err) {
             loading.classList.add('d-none');
-            showError("Could not load database file. Please ensure 'all_student_marks.csv' is present.");
+            showError(`Failed to load data for ${filename}`);
+            console.error(err);
+            allData = [];
+            applyFilters();
         }
     });
 }
@@ -187,33 +236,70 @@ function populateFilters() {
     });
 }
 
-function applyFilters() {
+async function applyFilters() {
     const term = searchInput.value.toLowerCase().trim();
-    const batch = batchFilter.value;
-    const semester = semesterFilter.value;
     const college = collegeFilter.value;
     const branch = branchFilter.value;
 
-    // Check if the search term looks like a registration number (e.g. 24110113031)
-    // If it's a specific reg number, we ignore dropdown filters to show ALL their semesters.
+    // Advanced Global Search across all CSVs if looking for a specific registration number
     const isRegSearch = /^\d{10,}$/.test(term);
 
-    filteredData = allData.filter(row => {
-        const matchSearch = term === '' ||
-                            (row.regNo && row.regNo.toLowerCase().includes(term)) ||
-                            (row.name && row.name.toLowerCase().includes(term));
+    // If the user clears the global search, we need to reload the current context
+    if (!isRegSearch && allData === filteredData && currentCsvFile) {
+        // We are currently in "global search mode" but the search is cleared
+        await loadSpecificCSV(currentCsvFile);
+        return; // loadSpecificCSV will call applyFilters internally
+    }
 
-        if (isRegSearch && term !== '') {
-            return matchSearch; // Return early, ignoring other filters for this student
+    if (isRegSearch && indexData.length > 0) {
+        loading.classList.remove('d-none');
+        resultsArea.innerHTML = '';
+        errorMsg.classList.add('d-none');
+
+        let globalResults = [];
+
+        // Fetch all known CSVs concurrently to find the student
+        try {
+            const fetchPromises = indexData.map(item => {
+                return new Promise((resolve) => {
+                    Papa.parse(item.file, {
+                        download: true,
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: function(res) {
+                            const found = res.data.filter(r => r.regNo && r.regNo.includes(term));
+                            found.forEach(f => {
+                                if(f) f.sgpaNum = parseFloat(f.sgpa) || 0;
+                            });
+                            globalResults.push(...found);
+                            resolve();
+                        },
+                        error: function() { resolve(); }
+                    });
+                });
+            });
+
+            await Promise.all(fetchPromises);
+
+            filteredData = globalResults;
+            allData = globalResults; // Temporary override for stats and charts to work smoothly
+        } catch(err) {
+            console.error("Global search failed", err);
         }
+        loading.classList.add('d-none');
+    } else {
+        // Normal filtering on current batch/semester CSV
+        filteredData = allData.filter(row => {
+            const matchSearch = term === '' ||
+                                (row.regNo && row.regNo.toLowerCase().includes(term)) ||
+                                (row.name && row.name.toLowerCase().includes(term));
 
-        const matchBatch = batch === '' || row.Session === batch;
-        const matchSemester = semester === '' || row.semester === semester;
-        const matchCollege = college === '' || row.college_name === college;
-        const matchBranch = branch === '' || row.course === branch;
+            const matchCollege = college === '' || row.college_name === college;
+            const matchBranch = branch === '' || row.course === branch;
 
-        return matchSearch && matchBatch && matchSemester && matchCollege && matchBranch;
-    });
+            return matchSearch && matchCollege && matchBranch;
+        });
+    }
 
     sortData();
     updateStats();
@@ -611,4 +697,55 @@ window.renderChartForStudent = function(regNo) {
 function showError(msg) {
     errorText.textContent = msg;
     errorMsg.classList.remove('d-none');
+}
+
+function populateBatchSemesterDropdowns() {
+    batchFilter.innerHTML = '';
+    semesterFilter.innerHTML = '';
+
+    const batches = [...new Set(indexData.map(item => item.batch))].sort((a,b) => b.localeCompare(a));
+    const semesters = [...new Set(indexData.map(item => item.semester))].sort((a,b) => a - b);
+
+    batches.forEach(b => {
+        const opt = document.createElement('option');
+        opt.value = b; opt.textContent = b;
+        batchFilter.appendChild(opt);
+    });
+
+    semesters.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s; opt.textContent = s;
+        semesterFilter.appendChild(opt);
+    });
+}
+
+function populateSecondaryFilters() {
+    const colleges = new Set();
+    const branches = new Set();
+
+    allData.forEach(row => {
+        if(row.college_name) colleges.add(row.college_name);
+        if(row.course) branches.add(row.course);
+    });
+
+    const currCol = collegeFilter.value;
+    const currBranch = branchFilter.value;
+
+    collegeFilter.innerHTML = '<option value="">All Colleges</option>';
+    branchFilter.innerHTML = '<option value="">All Branches</option>';
+
+    Array.from(colleges).sort().forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c; opt.textContent = c;
+        collegeFilter.appendChild(opt);
+    });
+
+    Array.from(branches).sort().forEach(b => {
+        const opt = document.createElement('option');
+        opt.value = b; opt.textContent = b;
+        branchFilter.appendChild(opt);
+    });
+
+    if(currCol && colleges.has(currCol)) collegeFilter.value = currCol;
+    if(currBranch && branches.has(currBranch)) branchFilter.value = currBranch;
 }
