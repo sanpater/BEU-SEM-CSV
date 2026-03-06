@@ -3,13 +3,14 @@ import json
 import csv
 from concurrent.futures import ThreadPoolExecutor
 
-def fetch_student(reg_no):
+def fetch_student(args):
+    reg_no, year, semester, exam_held = args
     base_url = "https://beu-bih.ac.in/backend/v1/result/get-result"
     params = {
-        "year": "2024",
+        "year": str(year),
         "redg_no": str(reg_no),
-        "semester": "I",
-        "exam_held": "May/2025"
+        "semester": str(semester),
+        "exam_held": str(exam_held)
     }
 
     try:
@@ -64,62 +65,111 @@ def fetch_student(reg_no):
         pass
     return None
 
+def get_btech_exams():
+    print("Fetching list of B.Tech exams from API...")
+    url = "https://beu-bih.ac.in/backend/v1/result/sem-get"
+    try:
+        response = requests.get(url, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            for c in data:
+                if c.get("courseName") == "B.Tech":
+                    return c.get("exams", [])
+    except Exception as e:
+        print(f"Error fetching exams: {e}")
+    return []
+
 def main():
     print("Starting data extraction...")
 
-    # Fast path: test only the specific colleges & courses requested or known valid
-    # Based on previous output, here is an optimized list to avoid huge delay
-    valid_colleges = [102, 103, 106, 107, 108, 109, 110, 111, 113, 117, 118, 119, 122, 123, 124, 125, 130, 144, 146, 170]
-    # To prevent extreme runtime, limit number of courses/colleges checked if needed, but we try all
-    common_courses = ['101', '102', '105', '110', '151', '119'] # Added 119 for 113
-
-    # We will just generate registrations for ALL valid colleges x common courses x roll 1 to 65
-    regs_to_check = []
-    for c_code in valid_colleges:
-        for crs_code in common_courses:
-            for roll in range(1, 66):
-                reg = f"24{crs_code}{str(c_code).zfill(3)}{str(roll).zfill(3)}"
-                regs_to_check.append(reg)
-
-    print(f"Total registration numbers to query: {len(regs_to_check)}")
-
-    all_data = []
-    all_subject_columns = set()
-
-    # High worker count without sleep (as requested)
-    with ThreadPoolExecutor(max_workers=200) as executor:
-        results = list(executor.map(fetch_student, regs_to_check))
-
-    for res in results:
-        if res:
-            all_data.append(res)
-            for key in res.keys():
-                if key not in ["regNo", "name", "father_name", "mother_name", "college_code", "college_name", "course_code", "course", "semester", "exam_held", "examYear", "sgpa", "cgpa", "fail_any"]:
-                    all_subject_columns.add(key)
-
-    print(f"Successfully collected {len(all_data)} student records.")
-
-    if not all_data:
-        print("No data collected.")
+    btech_exams = get_btech_exams()
+    if not btech_exams:
+        print("No B.Tech exams found.")
         return
 
-    # Write to CSV
-    basic_columns = [
-        "regNo", "name", "father_name", "mother_name",
-        "college_code", "college_name", "course_code", "course",
-        "semester", "exam_held", "examYear", "sgpa", "cgpa", "fail_any"
-    ]
+    print(f"Found {len(btech_exams)} B.Tech exams to process.")
 
-    sorted_subject_columns = sorted(list(all_subject_columns))
-    all_columns = basic_columns + sorted_subject_columns
+    # Fast path: test only the specific colleges & courses requested or known valid
+    valid_colleges = [102, 103, 106, 107, 108, 109, 110, 111, 113, 117, 118, 119, 122, 123, 124, 125, 130, 144, 146, 170]
+    common_courses = ['101', '102', '105', '110', '151', '119'] # Added 119 for 113
+    sem_roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII']
 
-    with open('all_student_marks.csv', 'w', newline='', encoding='utf-8') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=all_columns)
-        writer.writeheader()
-        for row in all_data:
-            writer.writerow(row)
+    for exam in btech_exams:
+        exam_name = exam.get("examName", "Unknown Exam")
+        session = exam.get("session", "")
+        batch_year = exam.get("batchYear", "")
+        exam_held = exam.get("examHeld", "")
+        sem_id = exam.get("semId", 1)
 
-    print("Saved all records to all_student_marks.csv")
+        # Get roman numeral for semester
+        semester_roman = sem_roman[sem_id - 1] if 1 <= sem_id <= 8 else str(sem_id)
+
+        # Extract prefix from session (e.g. '2021-25' -> '21')
+        start_year_str = session.split(' ')[0].split('-')[0] # '2023-27 (YBL)' -> '2023'
+        prefix = start_year_str[2:] if len(start_year_str) == 4 else ""
+
+        if not prefix:
+            print(f"Could not determine prefix for session: {session}, skipping {exam_name}")
+            continue
+
+        print(f"\n--- Processing Exam: {exam_name} ---")
+        print(f"Session: {session}, Prefix: {prefix}, Sem: {semester_roman}, Year: {batch_year}, Held: {exam_held}")
+
+        regs_to_check = []
+        for c_code in valid_colleges:
+            for crs_code in common_courses:
+                for roll in range(1, 66):
+                    reg = f"{prefix}{crs_code}{str(c_code).zfill(3)}{str(roll).zfill(3)}"
+                    # Package args for worker
+                    regs_to_check.append((reg, batch_year, semester_roman, exam_held))
+
+        print(f"Total registration numbers to query for this exam: {len(regs_to_check)}")
+
+        all_data = []
+        all_subject_columns = set()
+
+        # High worker count without sleep (as requested)
+        with ThreadPoolExecutor(max_workers=200) as executor:
+            results = list(executor.map(fetch_student, regs_to_check))
+
+        for res in results:
+            if res:
+                all_data.append(res)
+                for key in res.keys():
+                    if key not in ["regNo", "name", "father_name", "mother_name", "college_code", "college_name", "course_code", "course", "semester", "exam_held", "examYear", "sgpa", "cgpa", "fail_any"]:
+                        all_subject_columns.add(key)
+
+        print(f"Successfully collected {len(all_data)} student records for {exam_name}.")
+
+        if not all_data:
+            print(f"No data collected for {exam_name}.")
+            continue
+
+        # Write to CSV
+        basic_columns = [
+            "regNo", "name", "father_name", "mother_name",
+            "college_code", "college_name", "course_code", "course",
+            "semester", "exam_held", "examYear", "sgpa", "cgpa", "fail_any"
+        ]
+
+        sorted_subject_columns = sorted(list(all_subject_columns))
+        all_columns = basic_columns + sorted_subject_columns
+
+        # Exact filename requested: {start_year}_sem{sem_id}.csv (e.g. 2021_sem1.csv)
+        filename = f"{start_year_str}_sem{sem_id}.csv"
+
+        import os
+        # Use 'a' append mode if file already exists in case we process multiple exams for same semester
+        file_exists = os.path.isfile(filename)
+
+        with open(filename, 'a' if file_exists else 'w', newline='', encoding='utf-8') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=all_columns)
+            if not file_exists:
+                writer.writeheader()
+            for row in all_data:
+                writer.writerow(row)
+
+        print(f"Saved records to {filename}")
 
 if __name__ == "__main__":
     main()
