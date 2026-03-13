@@ -1,9 +1,12 @@
 import requests
 import json
 import csv
+import glob
+import os
 from concurrent.futures import ThreadPoolExecutor
 
 def fetch_student(args):
+    """Fetches a single student's data."""
     reg_no, year, semester, exam_held = args
     base_url = "https://beu-bih.ac.in/backend/v1/result/get-result"
     params = {
@@ -20,7 +23,6 @@ def fetch_student(args):
             if data.get("status") == 200 and data.get("data"):
                 student_info = data["data"]
 
-                # Basic info
                 processed_student = {
                     "regNo": student_info.get("redg_no"),
                     "name": student_info.get("name"),
@@ -38,32 +40,42 @@ def fetch_student(args):
                     "fail_any": student_info.get("fail_any")
                 }
 
-                # Theory Subjects
-                for subject in student_info.get("theorySubjects", []):
-                    sub_name = subject.get("name")
-                    if sub_name:
-                        processed_student[f"{sub_name}_code"] = subject.get("code")
-                        processed_student[f"{sub_name}_ese"] = subject.get("ese")
-                        processed_student[f"{sub_name}_ia"] = subject.get("ia")
-                        processed_student[f"{sub_name}_total"] = subject.get("total")
-                        processed_student[f"{sub_name}_grade"] = subject.get("grade")
-                        processed_student[f"{sub_name}_credit"] = subject.get("credit")
-
-                # Practical Subjects
-                for subject in student_info.get("practicalSubjects", []):
-                    sub_name = subject.get("name")
-                    if sub_name:
-                        processed_student[f"{sub_name}_code"] = subject.get("code")
-                        processed_student[f"{sub_name}_ese"] = subject.get("ese")
-                        processed_student[f"{sub_name}_ia"] = subject.get("ia")
-                        processed_student[f"{sub_name}_total"] = subject.get("total")
-                        processed_student[f"{sub_name}_grade"] = subject.get("grade")
-                        processed_student[f"{sub_name}_credit"] = subject.get("credit")
+                # Extract Subjects
+                for sub_type in ["theorySubjects", "practicalSubjects"]:
+                    for subject in student_info.get(sub_type, []):
+                        sub_name = subject.get("name")
+                        if sub_name:
+                            processed_student[f"{sub_name}_code"] = subject.get("code")
+                            processed_student[f"{sub_name}_ese"] = subject.get("ese")
+                            processed_student[f"{sub_name}_ia"] = subject.get("ia")
+                            processed_student[f"{sub_name}_total"] = subject.get("total")
+                            processed_student[f"{sub_name}_grade"] = subject.get("grade")
+                            processed_student[f"{sub_name}_credit"] = subject.get("credit")
 
                 return processed_student
-    except Exception as e:
+    except Exception:
         pass
     return None
+
+def fetch_college_course(args):
+    """Worker function: Scans a specific course in a specific college and stops after 10 empty rolls."""
+    prefix, crs_code, c_code, batch_year, semester_roman, exam_held = args
+    results = []
+    empty_count = 0
+    
+    for roll in range(1, 150): # Assuming max 150 students per branch
+        reg = f"{prefix}{crs_code}{str(c_code).zfill(3)}{str(roll).zfill(3)}"
+        student_data = fetch_student((reg, batch_year, semester_roman, exam_held))
+        
+        if student_data:
+            results.append(student_data)
+            empty_count = 0 # Reset counter when a student is found
+        else:
+            empty_count += 1
+            if empty_count >= 10: # Stop checking this course/college after 10 fails
+                break
+                
+    return results
 
 def get_btech_exams():
     print("Fetching list of B.Tech exams from API...")
@@ -82,9 +94,7 @@ def get_btech_exams():
 def main():
     print("Starting data extraction...")
 
-    # Clean up existing batch CSVs before running
-    import glob
-    import os
+    # Clean up existing batch CSVs
     for csv_file in glob.glob("*_sem*.csv"):
         try:
             os.remove(csv_file)
@@ -98,9 +108,14 @@ def main():
 
     print(f"Found {len(btech_exams)} B.Tech exams to process.")
 
-    # Fast path: test only the specific colleges & courses requested or known valid
-    valid_colleges = [102, 103, 106, 107, 108, 109, 110, 111, 113, 117, 118, 119, 122, 123, 124, 125, 130, 144, 146, 170]
-    common_courses = ['101', '102', '105', '110', '151', '119'] # Added 119 for 113
+    # Full updated list of 45 colleges
+    valid_colleges = [
+        101, 102, 103, 106, 107, 108, 109, 110, 111, 113, 114, 117, 118, 119, 
+        121, 122, 123, 124, 125, 126, 127, 130, 131, 132, 136, 141, 142, 143, 
+        144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 165, 
+        166, 167, 170
+    ]
+    common_courses = ['101', '102', '105', '110', '151', '119']
     sem_roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII']
 
     for exam in btech_exams:
@@ -110,65 +125,52 @@ def main():
         exam_held = exam.get("examHeld", "")
         sem_id = exam.get("semId", 1)
 
-        # Get roman numeral for semester
         semester_roman = sem_roman[sem_id - 1] if 1 <= sem_id <= 8 else str(sem_id)
-
-        # Extract prefix from session (e.g. '2021-25' -> '21')
-        start_year_str = session.split(' ')[0].split('-')[0] # '2023-27 (YBL)' -> '2023'
+        start_year_str = session.split(' ')[0].split('-')[0]
         prefix = start_year_str[2:] if len(start_year_str) == 4 else ""
 
         if not prefix:
-            print(f"Could not determine prefix for session: {session}, skipping {exam_name}")
             continue
 
         print(f"\n--- Processing Exam: {exam_name} ---")
         print(f"Session: {session}, Prefix: {prefix}, Sem: {semester_roman}, Year: {batch_year}, Held: {exam_held}")
 
-        regs_to_check = []
+        # Build tasks for the ThreadPool (each task is one college+course combo)
+        tasks_to_check = []
         for c_code in valid_colleges:
             for crs_code in common_courses:
-                for roll in range(1, 66):
-                    reg = f"{prefix}{crs_code}{str(c_code).zfill(3)}{str(roll).zfill(3)}"
-                    # Package args for worker
-                    regs_to_check.append((reg, batch_year, semester_roman, exam_held))
-
-        print(f"Total registration numbers to query for this exam: {len(regs_to_check)}")
+                tasks_to_check.append((prefix, crs_code, c_code, batch_year, semester_roman, exam_held))
 
         all_data = []
         all_subject_columns = set()
 
-        # High worker count without sleep (as requested)
+        # Run 200 combinations concurrently
         with ThreadPoolExecutor(max_workers=200) as executor:
-            results = list(executor.map(fetch_student, regs_to_check))
+            lists_of_results = list(executor.map(fetch_college_course, tasks_to_check))
 
-        for res in results:
-            if res:
-                all_data.append(res)
-                for key in res.keys():
+        # Flatten the list of lists and gather subject columns
+        for result_list in lists_of_results:
+            for student_dict in result_list:
+                all_data.append(student_dict)
+                for key in student_dict.keys():
                     if key not in ["regNo", "name", "father_name", "mother_name", "college_code", "college_name", "course_code", "course", "semester", "exam_held", "examYear", "sgpa", "cgpa", "fail_any"]:
                         all_subject_columns.add(key)
 
         print(f"Successfully collected {len(all_data)} student records for {exam_name}.")
 
         if not all_data:
-            print(f"No data collected for {exam_name}.")
             continue
 
-        # Write to CSV
+        # Correctly order columns (Basic Info first, then Subjects)
         basic_columns = [
             "regNo", "name", "father_name", "mother_name",
             "college_code", "college_name", "course_code", "course",
             "semester", "exam_held", "examYear", "sgpa", "cgpa", "fail_any"
         ]
-
         sorted_subject_columns = sorted(list(all_subject_columns))
         all_columns = basic_columns + sorted_subject_columns
 
-        # Exact filename requested: {start_year}_sem{sem_id}.csv (e.g. 2021_sem1.csv)
         filename = f"{start_year_str}_sem{sem_id}.csv"
-
-        import os
-        # Use 'a' append mode if file already exists in case we process multiple exams for same semester
         file_exists = os.path.isfile(filename)
 
         with open(filename, 'a' if file_exists else 'w', newline='', encoding='utf-8') as csvfile:
@@ -180,22 +182,18 @@ def main():
 
         print(f"Saved records to {filename}")
 
-    # Generate an index.json of all generated CSVs for the web UI
-    print("Generating index.json for web UI...")
+    # Generate index.json exactly as originally requested
+    print("\nGenerating index.json for web UI...")
     index_data = []
-    import glob
     for csv_file in glob.glob("*_sem*.csv"):
         parts = csv_file.replace(".csv", "").split("_sem")
         if len(parts) == 2:
-            batch = parts[0]
-            sem = parts[1]
             index_data.append({
                 "file": csv_file,
-                "batch": batch,
-                "semester": sem
+                "batch": parts[0],
+                "semester": parts[1]
             })
 
-    # Sort index data by batch descending, then semester ascending
     index_data.sort(key=lambda x: (-int(x["batch"]) if x["batch"].isdigit() else 0, int(x["semester"]) if x["semester"].isdigit() else 0))
 
     with open("index.json", "w", encoding="utf-8") as f:
