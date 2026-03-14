@@ -63,7 +63,7 @@ def fetch_college_course(args):
     results = []
     empty_count = 0
     
-    for roll in range(1, 150): # Assuming max 150 students per branch
+    for roll in range(1, 70): # Assuming max 150 students per branch
         reg = f"{prefix}{crs_code}{str(c_code).zfill(3)}{str(roll).zfill(3)}"
         student_data = fetch_student((reg, batch_year, semester_roman, exam_held))
         
@@ -145,7 +145,7 @@ def main():
         all_subject_columns = set()
 
         # Run 200 combinations concurrently
-        with ThreadPoolExecutor(max_workers=200) as executor:
+        with ThreadPoolExecutor(max_workers=2000) as executor:
             lists_of_results = list(executor.map(fetch_college_course, tasks_to_check))
 
         # Flatten the list of lists and gather subject columns

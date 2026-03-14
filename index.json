@@ -5,6 +5,71 @@
         "semester": "1"
     },
     {
+        "file": "2024_sem2.csv",
+        "batch": "2024",
+        "semester": "2"
+    },
+    {
+        "file": "2023_sem1.csv",
+        "batch": "2023",
+        "semester": "1"
+    },
+    {
+        "file": "2023_sem2.csv",
+        "batch": "2023",
+        "semester": "2"
+    },
+    {
+        "file": "2023_sem3.csv",
+        "batch": "2023",
+        "semester": "3"
+    },
+    {
+        "file": "2022_sem5.csv",
+        "batch": "2022",
+        "semester": "5"
+    },
+    {
+        "file": "2022_sem6.csv",
+        "batch": "2022",
+        "semester": "6"
+    },
+    {
+        "file": "2021_sem1.csv",
+        "batch": "2021",
+        "semester": "1"
+    },
+    {
+        "file": "2021_sem2.csv",
+        "batch": "2021",
+        "semester": "2"
+    },
+    {
+        "file": "2021_sem3.csv",
+        "batch": "2021",
+        "semester": "3"
+    },
+    {
+        "file": "2021_sem4.csv",
+        "batch": "2021",
+        "semester": "4"
+    },
+    {
+        "file": "2021_sem5.csv",
+        "batch": "2021",
+        "semester": "5"
+    },
+    {
+        "file": "2021_sem6.csv",
+        "batch": "2021",
+        "semester": "6"
+    },
+    {
+        "file": "2021_sem7.csv",
+        "batch": "2021",
+        "semester": "7"
+    },
+    {
         "file": "2021_sem8.csv",
         "batch": "2021",
         "semester": "8"
