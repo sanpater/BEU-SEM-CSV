@@ -44,6 +44,11 @@ document.addEventListener('DOMContentLoaded', () => {
     collegeFilter.addEventListener('change', applyFilters);
     branchFilter.addEventListener('change', applyFilters);
     sortFilter.addEventListener('change', applyFilters);
+    window.addEventListener('resize', () => {
+        if (groupedData.length > 0) {
+            renderPagination();
+        }
+    });
 
     if (themeToggleDarkBtn) {
         themeToggleDarkBtn.addEventListener('click', (e) => {
@@ -205,7 +210,7 @@ async function loadMultipleCSVs(filenames) {
         
         let msg = "Data for the selected filters has not been uploaded yet.";
         resultsArea.innerHTML = `<div class="col-12 text-center py-5">
-            <i class="fas fa-folder-open fs-1 text-muted opacity-50 mb-3"></i>
+            <i class="ti ti-folder fs-1 text-muted opacity-50 mb-3"></i>
             <h5 class="text-muted fw-bold">No Records Found</h5>
             <p class="text-muted small">${msg}</p>
         </div>`;
@@ -384,7 +389,7 @@ function renderPage(page) {
 
     if(groupedData.length === 0) {
         resultsArea.innerHTML = `<div class="col-12 text-center py-5 text-muted">
-            <i class="fas fa-folder-open fa-4x mb-3 text-secondary opacity-50"></i>
+            <i class="ti ti-folder fa-4x mb-3 text-secondary opacity-50" style="font-size: 4rem;"></i>
             <h4>No records found</h4>
             <p>Try adjusting your search or filters.</p>
         </div>`;
@@ -475,11 +480,18 @@ function renderPagination() {
         return li;
     };
 
-    paginationList.appendChild(createBtn('<i class="fas fa-chevron-left"></i>', currentPage - 1, currentPage === 1, false));
+    paginationList.appendChild(createBtn('<i class="ti ti-chevron-left"></i>', currentPage - 1, currentPage === 1, false));
 
-    let startPage = Math.max(1, currentPage - 2);
-    let endPage = Math.min(totalPages, startPage + 4);
-    if(endPage - startPage < 4) startPage = Math.max(1, endPage - 4);
+    // Determine how many page buttons to show based on screen size
+    const isMobile = window.innerWidth < 576;
+    const windowSize = isMobile ? 3 : 5;
+    const halfWindow = Math.floor(windowSize / 2);
+
+    let startPage = Math.max(1, currentPage - halfWindow);
+    let endPage = Math.min(totalPages, startPage + windowSize - 1);
+    if(endPage - startPage < windowSize - 1) {
+        startPage = Math.max(1, endPage - windowSize + 1);
+    }
 
     if (startPage > 1) {
         paginationList.appendChild(createBtn('1', 1, false, false));
@@ -503,7 +515,7 @@ function renderPagination() {
         paginationList.appendChild(createBtn(totalPages, totalPages, false, false));
     }
 
-    paginationList.appendChild(createBtn('<i class="fas fa-chevron-right"></i>', currentPage + 1, currentPage === totalPages, false));
+    paginationList.appendChild(createBtn('<i class="ti ti-chevron-right"></i>', currentPage + 1, currentPage === totalPages, false));
 }
 
 // Ensure the student details modal function is accessible globally
