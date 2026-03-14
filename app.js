@@ -22,7 +22,8 @@ const totalRecords = document.getElementById('totalRecords');
 const paginationNav = document.getElementById('paginationNav');
 const paginationList = document.getElementById('paginationList');
 const studentModal = new bootstrap.Modal(document.getElementById('studentModal'));
-const themeToggleBtn = document.getElementById('themeToggle');
+const themeToggleDarkBtn = document.getElementById('themeToggleDark');
+const themeToggleLightBtn = document.getElementById('themeToggleLight');
 
 // Stats Elements
 const statTotal = document.getElementById('statTotal');
@@ -43,43 +44,45 @@ document.addEventListener('DOMContentLoaded', () => {
     collegeFilter.addEventListener('change', applyFilters);
     branchFilter.addEventListener('change', applyFilters);
     sortFilter.addEventListener('change', applyFilters);
-    themeToggleBtn.addEventListener('click', toggleTheme);
+
+    if (themeToggleDarkBtn) {
+        themeToggleDarkBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            setTheme('dark');
+        });
+    }
+
+    if (themeToggleLightBtn) {
+        themeToggleLightBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            setTheme('light');
+        });
+    }
 });
 
 // Theme Logic
 function initTheme() {
     const savedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    updateThemeIcon(savedTheme);
+    setTheme(savedTheme, false);
 }
 
-function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+function setTheme(theme, reRenderChart = true) {
+    document.body.setAttribute('data-bs-theme', theme);
+    localStorage.setItem('theme', theme);
 
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-    updateThemeIcon(newTheme);
+    if (theme === 'dark') {
+        if (themeToggleDarkBtn) themeToggleDarkBtn.style.display = 'none';
+        if (themeToggleLightBtn) themeToggleLightBtn.style.display = 'block';
+    } else {
+        if (themeToggleDarkBtn) themeToggleDarkBtn.style.display = 'block';
+        if (themeToggleLightBtn) themeToggleLightBtn.style.display = 'none';
+    }
 
     // Re-render chart if open to match theme
-    if(currentChart && document.getElementById('studentModal').classList.contains('show')) {
+    if(reRenderChart && currentChart && document.getElementById('studentModal').classList.contains('show')) {
         // Redraw chart with new theme colors
         const activeRegNo = document.getElementById('modalTitle').getAttribute('data-reg');
         if(activeRegNo) renderChartForStudent(activeRegNo);
-    }
-}
-
-function updateThemeIcon(theme) {
-    const icon = themeToggleBtn.querySelector('i');
-    const span = themeToggleBtn.querySelector('span');
-    if (theme === 'dark') {
-        icon.className = 'fas fa-sun text-warning';
-        span.textContent = 'Light Mode';
-        themeToggleBtn.classList.replace('btn-outline-dark', 'btn-outline-light');
-    } else {
-        icon.className = 'fas fa-moon';
-        span.textContent = 'Dark Mode';
-        themeToggleBtn.classList.replace('btn-outline-light', 'btn-outline-dark');
     }
 }
 
@@ -395,7 +398,7 @@ function renderPage(page) {
 
     paginatedItems.forEach((studentGroup, index) => {
         const isPass = studentGroup.isOverallPass;
-        const badgeClass = isPass ? 'pass-status' : 'fail-status';
+        const badgeClass = isPass ? 'bg-green' : 'bg-red';
         const statusText = isPass ? 'CLEAR' : 'BACKLOGS';
 
         // Calculate total marks across all semesters
@@ -408,44 +411,41 @@ function renderPage(page) {
             });
         });
 
-        // Staggered animation delay
-        const delay = (index % 12) * 0.05;
-
         const card = document.createElement('div');
-        card.className = 'col-lg-4 col-md-6 mb-4';
-        card.style.animationDelay = `${delay}s`;
+        card.className = 'col-sm-6 col-lg-4 mb-3';
         
         // Multi-semester badge string
         const semestersText = studentGroup.semesters.length > 1 ? `${studentGroup.semesters.length} Semesters` : `Sem ${studentGroup.semesters[0]}`;
 
         card.innerHTML = `
-            <div class="card h-100 student-card" onclick="showStudentDetails('${studentGroup.regNo}')">
-                <span class="status-badge ${badgeClass} fw-bold"><i class="fas ${isPass ? 'fa-check-circle' : 'fa-times-circle'} me-1"></i>${statusText}</span>
-                <div class="card-body p-4 d-flex flex-column">
-                    <div class="d-flex align-items-center mb-4">
-                        <div class="avatar-circle text-white rounded-circle d-flex align-items-center justify-content-center fw-bold me-3 shadow-sm flex-shrink-0">
-                            ${studentGroup.name ? studentGroup.name.charAt(0) : '?'}
+            <div class="card card-sm h-100 cursor-pointer card-hover-shadow" onclick="showStudentDetails('${studentGroup.regNo}')">
+                <div class="card-status-top ${isPass ? 'bg-green' : 'bg-red'}"></div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <span class="avatar me-3 rounded text-white ${studentGroup.avgSgpa >= 8 ? 'bg-primary' : 'bg-secondary'}">${studentGroup.name ? studentGroup.name.charAt(0) : '?'}</span>
+                        <div>
+                            <div class="font-weight-medium">${studentGroup.name}</div>
+                            <div class="text-muted">${studentGroup.regNo}</div>
                         </div>
-                        <div class="overflow-hidden">
-                            <h5 class="card-title mb-1 fw-bold text-truncate" title="${studentGroup.name}">${studentGroup.name}</h5>
-                            <small class="text-muted"><i class="fas fa-id-card me-1"></i>${studentGroup.regNo}</small>
+                        <div class="ms-auto">
+                            <span class="badge ${badgeClass}-lt">${statusText}</span>
                         </div>
                     </div>
-
-                    <div class="small mb-4 text-muted flex-grow-1">
-                        <div class="text-truncate mb-2" title="${studentGroup.course}"><i class="fas fa-book me-2 text-primary opacity-75"></i>${studentGroup.course}</div>
-                        <div class="text-truncate mb-2" title="${studentGroup.college_name}"><i class="fas fa-university me-2 text-primary opacity-75"></i>${studentGroup.college_name}</div>
-                        <div class="text-truncate text-primary fw-bold"><i class="fas fa-layer-group me-2 opacity-75"></i>${semestersText}</div>
+                    <div class="mt-3 text-muted small">
+                        <div class="text-truncate" title="${studentGroup.course}"><i class="ti ti-book me-1"></i> ${studentGroup.course}</div>
+                        <div class="text-truncate mt-1" title="${studentGroup.college_name}"><i class="ti ti-building me-1"></i> ${studentGroup.college_name}</div>
+                        <div class="text-truncate mt-1 text-primary"><i class="ti ti-layers me-1"></i> ${semestersText}</div>
                     </div>
-
-                    <div class="row g-0 pt-3 border-top mt-auto text-center">
-                        <div class="col-6 border-end">
-                            <span class="d-block small text-muted text-uppercase fw-bold mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">AVG SGPA</span>
-                            <span class="fs-4 fw-bold ${studentGroup.avgSgpa >= 8 ? 'text-success' : 'text-primary'}">${studentGroup.avgSgpa.toFixed(2) || 'N/A'}</span>
+                </div>
+                <div class="card-footer p-2 text-center bg-transparent border-0 mt-auto">
+                    <div class="row row-deck g-0">
+                        <div class="col border-end p-2">
+                            <div class="text-muted small text-uppercase font-weight-bold">Avg SGPA/CGPA</div>
+                            <div class="h3 mb-0 ${studentGroup.avgSgpa >= 8 ? 'text-success' : 'text-primary'}">${studentGroup.avgSgpa.toFixed(2) || 'N/A'}</div>
                         </div>
-                        <div class="col-6">
-                            <span class="d-block small text-muted text-uppercase fw-bold mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Total Marks</span>
-                            <span class="fs-4 fw-bold">${totalScore}</span>
+                        <div class="col p-2">
+                            <div class="text-muted small text-uppercase font-weight-bold">Total Marks</div>
+                            <div class="h3 mb-0">${totalScore}</div>
                         </div>
                     </div>
                 </div>
@@ -590,19 +590,19 @@ window.showStudentDetails = function(regNo) {
         });
 
         accordionHtml += `
-            <div class="accordion-item border mb-3 rounded shadow-sm">
+            <div class="accordion-item">
                 <h2 class="accordion-header" id="${headingId}">
-                    <button class="accordion-button ${idx === 0 ? '' : 'collapsed'} fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="${isExpanded}" aria-controls="${collapseId}">
+                    <button class="accordion-button ${idx === 0 ? '' : 'collapsed'}" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="${isExpanded}">
                         <div class="d-flex justify-content-between w-100 pe-3 flex-column flex-sm-row align-items-start align-items-sm-center">
-                            <span><i class="fas fa-calendar-alt me-2 text-primary"></i>Semester ${record.semester} <small class="text-muted ms-2 fw-normal">(${record.exam_held || ''})</small></span>
-                            <span class="badge ${isSemPass ? 'bg-success' : 'bg-danger'} ms-auto mt-2 mt-sm-0">${record.isEven ? 'CGPA' : 'SGPA'}: ${record.displaySgpa.toFixed(2)} - ${isSemPass ? 'PASS' : 'FAIL'}</span>
+                            <span><i class="ti ti-calendar me-2 text-primary"></i>Semester ${record.semester} <small class="text-muted ms-2 fw-normal">(${record.exam_held || ''})</small></span>
+                            <span class="badge ${isSemPass ? 'bg-green' : 'bg-red'} ms-auto mt-2 mt-sm-0">${record.isEven ? 'CGPA' : 'SGPA'}: ${record.displaySgpa.toFixed(2)} - ${isSemPass ? 'PASS' : 'FAIL'}</span>
                         </div>
                     </button>
                 </h2>
-                <div id="${collapseId}" class="accordion-collapse collapse ${showClass}" aria-labelledby="${headingId}" data-bs-parent="#semAccordion">
-                    <div class="accordion-body p-0">
+                <div id="${collapseId}" class="accordion-collapse collapse ${showClass}" data-bs-parent="#semAccordion">
+                    <div class="accordion-body pt-0 pb-0">
                         <div class="table-responsive">
-                            <table class="table table-hover table-custom align-middle mb-0">
+                            <table class="table table-vcenter card-table table-striped table-hover mt-3 mb-3">
                                 <thead>
                                     <tr>
                                         <th>Code</th>
@@ -615,18 +615,18 @@ window.showStudentDetails = function(regNo) {
                                     </tr>
                                 </thead>
                                 <tbody>${subjectsHtml}</tbody>
-                                <tfoot class="bg-light">
+                                <tfoot class="bg-transparent font-weight-bold">
                                     <tr>
-                                        <td colspan="2" class="text-end fw-bold text-muted text-uppercase">Total:</td>
-                                        <td class="text-center fw-bold">${totalCredits}</td>
+                                        <td colspan="2" class="text-end text-muted text-uppercase">Total:</td>
+                                        <td class="text-center">${totalCredits}</td>
                                         <td colspan="2"></td>
-                                        <td class="text-center fw-bold fs-5 text-primary">${grandTotal}</td>
+                                        <td class="text-center fs-3 text-primary">${grandTotal}</td>
                                         <td></td>
                                     </tr>
                                 </tfoot>
                             </table>
                         </div>
-                        ${!isSemPass ? `<div class="alert alert-danger m-3 py-2 small fw-bold text-center border-0"><i class="fas fa-exclamation-triangle me-2"></i> BACKLOG: ${record.fail_any.replace('FAIL:', '')}</div>` : ''}
+                        ${!isSemPass ? `<div class="alert alert-danger m-3 py-2 small fw-bold text-center"><i class="ti ti-alert-triangle me-2"></i> BACKLOG: ${record.fail_any.replace('FAIL:', '')}</div>` : ''}
                     </div>
                 </div>
             </div>
@@ -634,64 +634,62 @@ window.showStudentDetails = function(regNo) {
     });
 
     const bodyHtml = `
-        <div class="modal-header-info p-4 p-md-5">
+        <div class="modal-body bg-muted-lt pb-4">
             <div class="row align-items-center">
                 <div class="col-md-7 mb-4 mb-md-0">
                     <div class="d-flex align-items-center mb-4">
-                        <div class="avatar-circle text-white rounded d-flex align-items-center justify-content-center fw-bold me-4 shadow flex-shrink-0" style="width: 80px; height: 80px; font-size: 2rem;">
-                            ${studentGroup.name.charAt(0)}
-                        </div>
+                        <span class="avatar avatar-xl me-3 rounded text-white ${studentGroup.avgSgpa >= 8 ? 'bg-primary' : 'bg-secondary'}">${studentGroup.name.charAt(0)}</span>
                         <div>
-                            <h3 class="mb-1 fw-bold text-primary">${studentGroup.name}</h3>
-                            <div class="text-muted fs-5"><i class="fas fa-id-card me-2"></i>${studentGroup.regNo}</div>
+                            <h2 class="mb-1 text-primary">${studentGroup.name}</h2>
+                            <div class="text-muted"><i class="ti ti-id me-2"></i>${studentGroup.regNo}</div>
                         </div>
                     </div>
                     <table class="table table-sm table-borderless mb-0">
-                        <tr><td class="text-muted w-25 pb-2"><i class="fas fa-user-tie me-2"></i>Father:</td><td class="fw-bold pb-2">${studentGroup.father_name}</td></tr>
-                        <tr><td class="text-muted w-25 pb-2"><i class="fas fa-user me-2"></i>Mother:</td><td class="fw-bold pb-2">${studentGroup.mother_name}</td></tr>
-                        <tr><td class="text-muted w-25 pb-2"><i class="fas fa-book-open me-2"></i>Course:</td><td class="fw-bold pb-2">${studentGroup.course}</td></tr>
-                        <tr><td class="text-muted w-25 pb-2"><i class="fas fa-university me-2"></i>College:</td><td class="fw-bold pb-2">${studentGroup.college_name}</td></tr>
+                        <tr><td class="text-muted w-25 pb-2"><i class="ti ti-user me-2"></i>Father:</td><td class="font-weight-medium pb-2">${studentGroup.father_name}</td></tr>
+                        <tr><td class="text-muted w-25 pb-2"><i class="ti ti-user-circle me-2"></i>Mother:</td><td class="font-weight-medium pb-2">${studentGroup.mother_name}</td></tr>
+                        <tr><td class="text-muted w-25 pb-2"><i class="ti ti-book me-2"></i>Course:</td><td class="font-weight-medium pb-2">${studentGroup.course}</td></tr>
+                        <tr><td class="text-muted w-25 pb-2"><i class="ti ti-building me-2"></i>College:</td><td class="font-weight-medium pb-2">${studentGroup.college_name}</td></tr>
                     </table>
                 </div>
                 <div class="col-md-5">
-                    <div class="card border-0 shadow-sm bg-white mb-3" style="border-radius: 15px;">
-                        <div class="card-body p-4 text-center">
-                            <span class="d-block text-muted text-uppercase fw-bold mb-2 small" style="letter-spacing: 1px;">Overall Average SGPA</span>
-                            <div class="d-flex justify-content-center align-items-end gap-3 mb-3">
-                                <div>
-                                    <h1 class="display-3 fw-bold mb-0 ${studentGroup.avgSgpa >= 8 ? 'text-success' : 'text-primary'}">${studentGroup.avgSgpa.toFixed(2)}</h1>
-                                    <span class="text-muted fw-bold small">ACROSS ${sortedRecords.length} SEMESTERS</span>
-                                </div>
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body text-center">
+                            <div class="text-muted text-uppercase font-weight-bold mb-2">Overall Average SGPA</div>
+                            <div class="h1 mb-1 ${studentGroup.avgSgpa >= 8 ? 'text-success' : 'text-primary'}" style="font-size: 3.5rem;">${studentGroup.avgSgpa.toFixed(2)}</div>
+                            <div class="text-muted mb-3">ACROSS ${sortedRecords.length} SEMESTERS</div>
+                            <div class="badge ${isPass ? 'bg-green' : 'bg-red'} w-100 py-2 fs-4">
+                                <i class="ti ${isPass ? 'ti-check' : 'ti-x'} me-1"></i> OVERALL: ${isPass ? 'CLEAR' : 'BACKLOGS PRESENT'}
                             </div>
-                            <span class="badge ${isPass ? 'bg-success' : 'bg-danger'} px-4 py-2 fs-6 rounded-pill w-100 shadow-sm">
-                                <i class="fas ${isPass ? 'fa-check-circle' : 'fa-times-circle'} me-1"></i> OVERALL: ${isPass ? 'CLEAR' : 'BACKLOGS PRESENT'}
-                            </span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="p-4 p-md-5">
-            <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active fw-bold" id="marks-tab" data-bs-toggle="tab" data-bs-target="#marks" type="button" role="tab"><i class="fas fa-list-alt me-2"></i>Academic History</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link fw-bold" id="chart-tab" data-bs-toggle="tab" data-bs-target="#chart" type="button" role="tab" onclick="renderChartForStudent('${studentGroup.regNo}')"><i class="fas fa-chart-line me-2"></i>Performance Chart</button>
-                </li>
-            </ul>
+        <div class="modal-body pt-4">
+            <div class="card-tabs">
+                <ul class="nav nav-tabs nav-fill" data-bs-toggle="tabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a href="#marks" class="nav-link active" data-bs-toggle="tab" aria-selected="true" role="tab"><i class="ti ti-list me-2"></i>Academic History</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a href="#chart" class="nav-link" data-bs-toggle="tab" aria-selected="false" role="tab" tabindex="-1" onclick="renderChartForStudent('${studentGroup.regNo}')"><i class="ti ti-chart-line me-2"></i>Performance Chart</a>
+                    </li>
+                </ul>
 
-            <div class="tab-content" id="myTabContent">
-                <div class="tab-pane fade show active" id="marks" role="tabpanel">
-                    <div class="accordion" id="semAccordion">
-                        ${accordionHtml}
+                <div class="tab-content">
+                    <div class="tab-pane active show" id="marks" role="tabpanel">
+                        <div class="accordion" id="semAccordion">
+                            ${accordionHtml}
+                        </div>
                     </div>
-                </div>
 
-                <div class="tab-pane fade" id="chart" role="tabpanel">
-                    <div class="chart-container rounded p-3 border shadow-sm" style="background: var(--bg-card)">
-                        <canvas id="performanceChart"></canvas>
+                    <div class="tab-pane" id="chart" role="tabpanel">
+                        <div class="card-body p-3 border rounded">
+                            <div class="chart-container">
+                                <canvas id="performanceChart"></canvas>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -706,7 +704,7 @@ window.renderChartForStudent = function(regNo) {
     const studentGroup = groupedData.find(s => s.regNo === regNo);
     if(!studentGroup) return;
 
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const isDark = document.body.getAttribute('data-bs-theme') === 'dark';
     const textColor = isDark ? '#e0e0e0' : '#666';
     const gridColor = isDark ? '#333' : '#e5e5e5';
 
