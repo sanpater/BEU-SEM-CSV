@@ -90,6 +90,12 @@ let currentCsvFile = "";
 const KNOWN_BATCHES = ["2020", "2021", "2022", "2023", "2024", "2025"];
 const KNOWN_SEMESTERS = ["1", "2", "3", "4", "5", "6", "7", "8"];
 
+function isEvenSemester(semStr) {
+    if (!semStr) return false;
+    const s = semStr.toUpperCase();
+    return s === "II" || s === "IV" || s === "VI" || s === "VIII" || s === "2" || s === "4" || s === "6" || s === "8";
+}
+
 async function loadCSVData() {
     loading.classList.remove('d-none');
     
@@ -170,6 +176,7 @@ async function loadMultipleCSVs(filenames) {
                         res.data.forEach(row => {
                             if(row.regNo) {
                                 row.sgpaNum = parseFloat(row.sgpa) || 0;
+                                row.cgpaNum = parseFloat(row.cgpa) || row.sgpaNum;
                                 row.sourceFile = filename;
                                 allData.push(row);
                             }
@@ -322,18 +329,20 @@ function groupFilteredData() {
             };
         }
         
+        const semName = row.semester || "Unknown";
+        row.isEven = isEvenSemester(semName);
+        row.displaySgpa = row.isEven ? row.cgpaNum : row.sgpaNum;
+
         studentMap[regNo].records.push(row);
         
-        const semName = row.semester || "Unknown";
         if (!studentMap[regNo].semesters.includes(semName)) {
             studentMap[regNo].semesters.push(semName);
         }
         
         if(row.fail_any === 'PASS') studentMap[regNo].passCount++;
         
-        const sgpa = parseFloat(row.sgpa);
-        if(!isNaN(sgpa) && sgpa > 0) {
-            studentMap[regNo].totalSgpa += sgpa;
+        if(!isNaN(row.displaySgpa) && row.displaySgpa > 0) {
+            studentMap[regNo].totalSgpa += row.displaySgpa;
             studentMap[regNo].sgpaCount++;
         }
     });
@@ -584,9 +593,9 @@ window.showStudentDetails = function(regNo) {
             <div class="accordion-item border mb-3 rounded shadow-sm">
                 <h2 class="accordion-header" id="${headingId}">
                     <button class="accordion-button ${idx === 0 ? '' : 'collapsed'} fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="${isExpanded}" aria-controls="${collapseId}">
-                        <div class="d-flex justify-content-between align-items-center w-100 pe-3">
+                        <div class="d-flex justify-content-between w-100 pe-3 flex-column flex-sm-row align-items-start align-items-sm-center">
                             <span><i class="fas fa-calendar-alt me-2 text-primary"></i>Semester ${record.semester} <small class="text-muted ms-2 fw-normal">(${record.exam_held || ''})</small></span>
-                            <span class="badge ${isSemPass ? 'bg-success' : 'bg-danger'} ms-auto">SGPA: ${record.sgpaNum.toFixed(2)} - ${isSemPass ? 'PASS' : 'FAIL'}</span>
+                            <span class="badge ${isSemPass ? 'bg-success' : 'bg-danger'} ms-auto mt-2 mt-sm-0">${record.isEven ? 'CGPA' : 'SGPA'}: ${record.displaySgpa.toFixed(2)} - ${isSemPass ? 'PASS' : 'FAIL'}</span>
                         </div>
                     </button>
                 </h2>
@@ -596,13 +605,13 @@ window.showStudentDetails = function(regNo) {
                             <table class="table table-hover table-custom align-middle mb-0">
                                 <thead>
                                     <tr>
-                                        <th width="12%">Code</th>
-                                        <th width="35%">Subject Name</th>
-                                        <th width="8%" class="text-center">Credit</th>
-                                        <th width="10%" class="text-center">ESE <small>(Ext)</small></th>
-                                        <th width="10%" class="text-center">IA <small>(Int)</small></th>
-                                        <th width="10%" class="text-center text-primary">Total</th>
-                                        <th width="15%" class="text-center">Grade</th>
+                                        <th>Code</th>
+                                        <th class="subject-name-col">Subject Name</th>
+                                        <th class="text-center">Credit</th>
+                                        <th class="text-center">ESE <small>(Ext)</small></th>
+                                        <th class="text-center">IA <small>(Int)</small></th>
+                                        <th class="text-center text-primary">Total</th>
+                                        <th class="text-center">Grade</th>
                                     </tr>
                                 </thead>
                                 <tbody>${subjectsHtml}</tbody>
@@ -717,14 +726,14 @@ window.renderChartForStudent = function(regNo) {
     if (sortedRecords.length > 1) {
         // Multi-semester: Line Chart for SGPA Progression
         const labels = sortedRecords.map(r => `Sem ${r.semester}`);
-        const sgpaData = sortedRecords.map(r => r.sgpaNum);
+        const sgpaData = sortedRecords.map(r => r.displaySgpa);
         
         currentChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'SGPA Progression',
+                    label: 'Performance (SGPA/CGPA)',
                     data: sgpaData,
                     borderColor: 'rgb(78, 115, 223)',
                     backgroundColor: 'rgba(78, 115, 223, 0.2)',
@@ -753,7 +762,7 @@ window.renderChartForStudent = function(regNo) {
                         max: 10,
                         ticks: { color: textColor },
                         grid: { color: gridColor },
-                        title: { display: true, text: 'SGPA', color: textColor, font: { weight: 'bold' } }
+                        title: { display: true, text: 'Score', color: textColor, font: { weight: 'bold' } }
                     }
                 }
             }

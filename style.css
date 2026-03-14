@@ -155,6 +155,15 @@ body {
     letter-spacing: 1px;
     border-bottom: 2px solid var(--border-color);
     padding: 12px 8px;
+    white-space: nowrap;
+}
+
+.table-custom td {
+    white-space: nowrap;
+}
+
+.subject-name-col {
+    min-width: 200px;
 }
 
 .table-hover tbody tr:hover {
