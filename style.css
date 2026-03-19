@@ -10,12 +10,12 @@
 }
 
 [data-theme="dark"] {
-    --bg-main: #121212;
-    --bg-card: #1e1e1e;
+    --bg-main: #0a0a0a;
+    --bg-card: #151515;
     --text-main: #e0e0e0;
-    --text-muted: #a0a0a0;
-    --border-color: #333333;
-    --modal-header-bg: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
+    --text-muted: #888888;
+    --border-color: #2a2a2a;
+    --modal-header-bg: linear-gradient(135deg, #151515 0%, #1f1f1f 100%);
     --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
     --card-hover-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.7);
 }
@@ -25,6 +25,20 @@ body {
     background-color: var(--bg-main);
     color: var(--text-main);
     transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+[data-theme="dark"] .bg-white {
+    background-color: var(--bg-card) !important;
+}
+
+[data-theme="dark"] .text-dark {
+    color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .table-secondary th, [data-theme="dark"] .table-secondary td {
+    background-color: #1f1f1f;
+    color: var(--text-main);
+    border-color: var(--border-color);
 }
 
 /* Gradients */
@@ -160,6 +174,48 @@ body {
 .table-hover tbody tr:hover {
     color: var(--text-main);
     background-color: var(--bg-main);
+}
+
+[data-theme="dark"] .table-hover tbody tr:hover td {
+    background-color: #1a1a1a;
+    color: var(--text-main);
+}
+
+[data-theme="dark"] .accordion-button {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+}
+
+[data-theme="dark"] .accordion-button:not(.collapsed) {
+    background-color: #1f1f1f;
+    color: var(--text-main);
+}
+
+[data-theme="dark"] .accordion-item {
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .nav-tabs .nav-link {
+    color: var(--text-muted);
+}
+
+[data-theme="dark"] .nav-tabs .nav-link.active {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    border-color: var(--border-color) var(--border-color) var(--bg-card);
+}
+
+[data-theme="dark"] .border {
+    border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .border-end {
+    border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .border-top {
+    border-color: var(--border-color) !important;
 }
 
 .grade-box {

@@ -20,6 +20,24 @@ def fetch_student(args):
             if data.get("status") == 200 and data.get("data"):
                 student_info = data["data"]
 
+                # Map semester roman numeral to index 0-7
+                sem_map = {"I": 0, "II": 1, "III": 2, "IV": 3, "V": 4, "VI": 5, "VII": 6, "VIII": 7}
+                sem_str = student_info.get("semester", "")
+                sem_idx = sem_map.get(sem_str.upper(), 0)
+
+                # Extract the correct SGPA for the current semester from the array
+                sgpa_array = student_info.get("sgpa", [])
+                current_sgpa = None
+                if sgpa_array and len(sgpa_array) > sem_idx:
+                    current_sgpa = sgpa_array[sem_idx]
+
+                # If missing at that index for some reason, try first non-null
+                if current_sgpa is None and sgpa_array:
+                    for s in sgpa_array:
+                        if s is not None:
+                            current_sgpa = s
+                            break
+
                 # Basic info
                 processed_student = {
                     "regNo": student_info.get("redg_no"),
@@ -33,32 +51,37 @@ def fetch_student(args):
                     "semester": student_info.get("semester"),
                     "exam_held": student_info.get("exam_held"),
                     "examYear": student_info.get("examYear"),
-                    "sgpa": student_info.get("sgpa", [None])[0] if student_info.get("sgpa") else None,
+                    "sgpa": current_sgpa,
                     "cgpa": student_info.get("cgpa"),
                     "fail_any": student_info.get("fail_any")
                 }
 
-                # Theory Subjects
+                # Store all historical SGPAs if they exist
+                for i in range(8):
+                    val = sgpa_array[i] if sgpa_array and len(sgpa_array) > i else None
+                    processed_student[f"sgpa_{i+1}"] = val
+
+                # Theory Subjects (prepend T_ to column names to distinguish)
                 for subject in student_info.get("theorySubjects", []):
                     sub_name = subject.get("name")
                     if sub_name:
-                        processed_student[f"{sub_name}_code"] = subject.get("code")
-                        processed_student[f"{sub_name}_ese"] = subject.get("ese")
-                        processed_student[f"{sub_name}_ia"] = subject.get("ia")
-                        processed_student[f"{sub_name}_total"] = subject.get("total")
-                        processed_student[f"{sub_name}_grade"] = subject.get("grade")
-                        processed_student[f"{sub_name}_credit"] = subject.get("credit")
+                        processed_student[f"T_{sub_name}_code"] = subject.get("code")
+                        processed_student[f"T_{sub_name}_ese"] = subject.get("ese")
+                        processed_student[f"T_{sub_name}_ia"] = subject.get("ia")
+                        processed_student[f"T_{sub_name}_total"] = subject.get("total")
+                        processed_student[f"T_{sub_name}_grade"] = subject.get("grade")
+                        processed_student[f"T_{sub_name}_credit"] = subject.get("credit")
 
-                # Practical Subjects
+                # Practical Subjects (prepend P_ to column names to distinguish)
                 for subject in student_info.get("practicalSubjects", []):
                     sub_name = subject.get("name")
                     if sub_name:
-                        processed_student[f"{sub_name}_code"] = subject.get("code")
-                        processed_student[f"{sub_name}_ese"] = subject.get("ese")
-                        processed_student[f"{sub_name}_ia"] = subject.get("ia")
-                        processed_student[f"{sub_name}_total"] = subject.get("total")
-                        processed_student[f"{sub_name}_grade"] = subject.get("grade")
-                        processed_student[f"{sub_name}_credit"] = subject.get("credit")
+                        processed_student[f"P_{sub_name}_code"] = subject.get("code")
+                        processed_student[f"P_{sub_name}_ese"] = subject.get("ese")
+                        processed_student[f"P_{sub_name}_ia"] = subject.get("ia")
+                        processed_student[f"P_{sub_name}_total"] = subject.get("total")
+                        processed_student[f"P_{sub_name}_grade"] = subject.get("grade")
+                        processed_student[f"P_{sub_name}_credit"] = subject.get("credit")
 
                 return processed_student
     except Exception as e:
@@ -145,7 +168,7 @@ def main():
             if res:
                 all_data.append(res)
                 for key in res.keys():
-                    if key not in ["regNo", "name", "father_name", "mother_name", "college_code", "college_name", "course_code", "course", "semester", "exam_held", "examYear", "sgpa", "cgpa", "fail_any"]:
+                    if key not in ["regNo", "name", "father_name", "mother_name", "college_code", "college_name", "course_code", "course", "semester", "exam_held", "examYear", "sgpa", "cgpa", "fail_any", "sgpa_1", "sgpa_2", "sgpa_3", "sgpa_4", "sgpa_5", "sgpa_6", "sgpa_7", "sgpa_8"]:
                         all_subject_columns.add(key)
 
         print(f"Successfully collected {len(all_data)} student records for {exam_name}.")
@@ -158,7 +181,8 @@ def main():
         basic_columns = [
             "regNo", "name", "father_name", "mother_name",
             "college_code", "college_name", "course_code", "course",
-            "semester", "exam_held", "examYear", "sgpa", "cgpa", "fail_any"
+            "semester", "exam_held", "examYear", "sgpa", "cgpa", "fail_any",
+            "sgpa_1", "sgpa_2", "sgpa_3", "sgpa_4", "sgpa_5", "sgpa_6", "sgpa_7", "sgpa_8"
         ]
 
         sorted_subject_columns = sorted(list(all_subject_columns))

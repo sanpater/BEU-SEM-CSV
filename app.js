@@ -318,7 +318,9 @@ function groupFilteredData() {
                 passCount: 0,
                 totalSgpa: 0,
                 sgpaCount: 0,
-                records: []
+                records: [],
+                cgpa: 0,
+                historicalSgpas: Array(8).fill(0)
             };
         }
 
@@ -336,12 +338,23 @@ function groupFilteredData() {
             studentMap[regNo].totalSgpa += sgpa;
             studentMap[regNo].sgpaCount++;
         }
+
+        if(row.cgpa && parseFloat(row.cgpa) > studentMap[regNo].cgpa) {
+            studentMap[regNo].cgpa = parseFloat(row.cgpa);
+        }
+
+        for(let i=1; i<=8; i++) {
+            if(row[`sgpa_${i}`] && parseFloat(row[`sgpa_${i}`]) > 0) {
+                studentMap[regNo].historicalSgpas[i-1] = parseFloat(row[`sgpa_${i}`]);
+            }
+        }
     });
 
     groupedData = Object.values(studentMap).map(student => {
         // Calculate cumulative properties
         student.isOverallPass = student.passCount === student.records.length;
         student.avgSgpa = student.sgpaCount > 0 ? (student.totalSgpa / student.sgpaCount) : 0;
+        student.displayGpa = student.cgpa > 0 ? student.cgpa : student.avgSgpa;
 
         // Sort semester names intuitively (I, II, III, IV, etc. or 1, 2, 3)
         const romanMap = { "I": 1, "II": 2, "III": 3, "IV": 4, "V": 5, "VI": 6, "VII": 7, "VIII": 8 };
@@ -358,9 +371,9 @@ function sortData() {
         if (sortVal === 'name_asc') {
             return (a.name || '').localeCompare(b.name || '');
         } else if (sortVal === 'sgpa_desc') {
-            return b.avgSgpa - a.avgSgpa;
+            return b.displayGpa - a.displayGpa;
         } else if (sortVal === 'sgpa_asc') {
-            return a.avgSgpa - b.avgSgpa;
+            return a.displayGpa - b.displayGpa;
         }
         return 0;
     });
@@ -431,8 +444,8 @@ function renderPage(page) {
 
                     <div class="row g-0 pt-3 border-top mt-auto text-center">
                         <div class="col-6 border-end">
-                            <span class="d-block small text-muted text-uppercase fw-bold mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">AVG SGPA</span>
-                            <span class="fs-4 fw-bold ${studentGroup.avgSgpa >= 8 ? 'text-success' : 'text-primary'}">${studentGroup.avgSgpa.toFixed(2) || 'N/A'}</span>
+                            <span class="d-block small text-muted text-uppercase fw-bold mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">${studentGroup.cgpa > 0 ? 'CGPA' : 'AVG SGPA'}</span>
+                            <span class="fs-4 fw-bold ${studentGroup.displayGpa >= 8 ? 'text-success' : 'text-primary'}">${studentGroup.displayGpa.toFixed(2) || 'N/A'}</span>
                         </div>
                         <div class="col-6">
                             <span class="d-block small text-muted text-uppercase fw-bold mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Total Marks</span>
@@ -525,37 +538,43 @@ window.showStudentDetails = function(regNo) {
         const isExpanded = idx === 0 ? 'true' : 'false';
         const showClass = idx === 0 ? 'show' : '';
 
-        const subjects = [];
+        const theorySubjects = [];
+        const practicalSubjects = [];
         const subjectNames = new Set();
 
         Object.keys(record).forEach(key => {
-            if(key.endsWith('_code')) {
-                const name = key.replace('_code', '');
-                subjectNames.add(name);
+            if(key.endsWith('_code') && (key.startsWith('T_') || key.startsWith('P_'))) {
+                subjectNames.add(key.replace('_code', ''));
             }
         });
 
         subjectNames.forEach(name => {
             if(record[`${name}_code`]) {
-                subjects.push({
-                    name: name,
+                const subObj = {
+                    name: name.substring(2), // Remove T_ or P_
                     code: record[`${name}_code`],
                     ese: parseInt(record[`${name}_ese`]) || 0,
                     ia: parseInt(record[`${name}_ia`]) || 0,
                     total: parseInt(record[`${name}_total`]) || 0,
                     grade: record[`${name}_grade`] || '-',
                     credit: record[`${name}_credit`] || '-'
-                });
+                };
+                if (name.startsWith('T_')) {
+                    theorySubjects.push(subObj);
+                } else if (name.startsWith('P_')) {
+                    practicalSubjects.push(subObj);
+                }
             }
         });
 
-        subjects.sort((a,b) => a.code.localeCompare(b.code));
+        theorySubjects.sort((a,b) => a.code.localeCompare(b.code));
+        practicalSubjects.sort((a,b) => a.code.localeCompare(b.code));
 
         let subjectsHtml = '';
         let totalCredits = 0;
         let grandTotal = 0;
 
-        subjects.forEach(sub => {
+        const renderSubjectRow = (sub) => {
             let gClass = 'grade-P';
             if(sub.grade === 'O' || sub.grade === 'A+') gClass = 'grade-O';
             else if(sub.grade === 'A') gClass = 'grade-A';
@@ -567,7 +586,7 @@ window.showStudentDetails = function(regNo) {
             totalCredits += parseFloat(sub.credit) || 0;
             grandTotal += sub.total;
 
-            subjectsHtml += `
+            return `
                 <tr>
                     <td class="text-muted font-monospace small">${sub.code}</td>
                     <td class="fw-bold">${sub.name}</td>
@@ -578,7 +597,21 @@ window.showStudentDetails = function(regNo) {
                     <td class="text-center"><span class="grade-box ${gClass}">${sub.grade}</span></td>
                 </tr>
             `;
-        });
+        };
+
+        if (theorySubjects.length > 0) {
+            subjectsHtml += `<tr class="table-secondary"><td colspan="7" class="fw-bold text-center small text-uppercase">Theory Subjects</td></tr>`;
+            theorySubjects.forEach(sub => {
+                subjectsHtml += renderSubjectRow(sub);
+            });
+        }
+
+        if (practicalSubjects.length > 0) {
+            subjectsHtml += `<tr class="table-secondary"><td colspan="7" class="fw-bold text-center small text-uppercase">Practical Subjects</td></tr>`;
+            practicalSubjects.forEach(sub => {
+                subjectsHtml += renderSubjectRow(sub);
+            });
+        }
 
         accordionHtml += `
             <div class="accordion-item border mb-3 rounded shadow-sm">
@@ -647,11 +680,11 @@ window.showStudentDetails = function(regNo) {
                 <div class="col-md-5">
                     <div class="card border-0 shadow-sm bg-white mb-3" style="border-radius: 15px;">
                         <div class="card-body p-4 text-center">
-                            <span class="d-block text-muted text-uppercase fw-bold mb-2 small" style="letter-spacing: 1px;">Overall Average SGPA</span>
+                            <span class="d-block text-muted text-uppercase fw-bold mb-2 small" style="letter-spacing: 1px;">${studentGroup.cgpa > 0 ? 'Cumulative GPA (CGPA)' : 'Overall Average SGPA'}</span>
                             <div class="d-flex justify-content-center align-items-end gap-3 mb-3">
                                 <div>
-                                    <h1 class="display-3 fw-bold mb-0 ${studentGroup.avgSgpa >= 8 ? 'text-success' : 'text-primary'}">${studentGroup.avgSgpa.toFixed(2)}</h1>
-                                    <span class="text-muted fw-bold small">ACROSS ${sortedRecords.length} SEMESTERS</span>
+                                    <h1 class="display-3 fw-bold mb-0 ${studentGroup.displayGpa >= 8 ? 'text-success' : 'text-primary'}">${studentGroup.displayGpa.toFixed(2)}</h1>
+                                    <span class="text-muted fw-bold small">${studentGroup.cgpa > 0 ? 'OFFICIAL CGPA' : `ACROSS ${sortedRecords.length} SEMESTERS`}</span>
                                 </div>
                             </div>
                             <span class="badge ${isPass ? 'bg-success' : 'bg-danger'} px-4 py-2 fs-6 rounded-pill w-100 shadow-sm">
@@ -714,8 +747,58 @@ window.renderChartForStudent = function(regNo) {
         return (romanMap[a.semester] || parseInt(a.semester) || 99) - (romanMap[b.semester] || parseInt(b.semester) || 99);
     });
 
-    if (sortedRecords.length > 1) {
-        // Multi-semester: Line Chart for SGPA Progression
+    if (studentGroup.historicalSgpas.some(val => val > 0)) {
+        // Using full historical SGPA array from the API if available
+        const validSemesters = [];
+        const validSgpas = [];
+        for(let i=0; i<8; i++) {
+            if(studentGroup.historicalSgpas[i] > 0) {
+                validSemesters.push(`Sem ${i+1}`);
+                validSgpas.push(studentGroup.historicalSgpas[i]);
+            }
+        }
+
+        currentChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: validSemesters,
+                datasets: [{
+                    label: 'SGPA Progression',
+                    data: validSgpas,
+                    borderColor: 'rgb(78, 115, 223)',
+                    backgroundColor: 'rgba(78, 115, 223, 0.2)',
+                    borderWidth: 3,
+                    pointBackgroundColor: 'rgb(28, 200, 138)',
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: textColor, font: { weight: 'bold' } } },
+                    tooltip: { mode: 'index', intersect: false }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: textColor, font: { weight: 'bold' } },
+                        grid: { color: gridColor, display: false }
+                    },
+                    y: {
+                        min: 0,
+                        max: 10,
+                        ticks: { color: textColor },
+                        grid: { color: gridColor },
+                        title: { display: true, text: 'SGPA', color: textColor, font: { weight: 'bold' } }
+                    }
+                }
+            }
+        });
+    } else if (sortedRecords.length > 1) {
+        // Fallback for Multi-semester: Line Chart for SGPA Progression (calculated from files)
         const labels = sortedRecords.map(r => `Sem ${r.semester}`);
         const sgpaData = sortedRecords.map(r => r.sgpaNum);
 
