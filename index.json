@@ -25,6 +25,11 @@
         "semester": "3"
     },
     {
+        "file": "2023_sem4.csv",
+        "batch": "2023",
+        "semester": "4"
+    },
+    {
         "file": "2022_sem5.csv",
         "batch": "2022",
         "semester": "5"
@@ -33,6 +38,11 @@
         "file": "2022_sem6.csv",
         "batch": "2022",
         "semester": "6"
+    },
+    {
+        "file": "2022_sem7.csv",
+        "batch": "2022",
+        "semester": "7"
     },
     {
         "file": "2021_sem1.csv",
