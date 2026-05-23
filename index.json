@@ -1,5 +1,10 @@
 [
     {
+        "file": "2025_sem1.csv",
+        "batch": "2025",
+        "semester": "1"
+    },
+    {
         "file": "2024_sem1.csv",
         "batch": "2024",
         "semester": "1"

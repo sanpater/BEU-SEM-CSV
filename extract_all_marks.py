@@ -145,7 +145,7 @@ def main():
         all_subject_columns = set()
 
         # Run 200 combinations concurrently
-        with ThreadPoolExecutor(max_workers=2000) as executor:
+        with ThreadPoolExecutor(max_workers=200) as executor:
             lists_of_results = list(executor.map(fetch_college_course, tasks_to_check))
 
         # Flatten the list of lists and gather subject columns
