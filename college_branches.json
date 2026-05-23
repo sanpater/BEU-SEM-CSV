@@ -1,0 +1,1092 @@
+[
+    {
+        "college_code": "102",
+        "college_name": "VIDYA VIHAR INSTITUTE OF TECHNOLOGY, PURNIA",
+        "branches": [
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            },
+            {
+                "course_code": "110",
+                "course": "ELECTRICAL & ELECTRONICS ENGINEERING"
+            }
+        ]
+    },
+    {
+        "college_code": "103",
+        "college_name": "NETAJI SUBHAS INSTITUTE OF TECHNOLOGY, BIHTA",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "104",
+                "course": "ELECTRONICS & COMMUNICATION ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            },
+            {
+                "course_code": "110",
+                "course": "ELECTRICAL & ELECTRONICS ENGINEERING"
+            }
+        ]
+    },
+    {
+        "college_code": "106",
+        "college_name": "SITYOG INSTITUTE OF TECHNOLOGY, AURANGABAD",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "103",
+                "course": "ELECTRICAL ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            }
+        ]
+    },
+    {
+        "college_code": "107",
+        "college_name": "MUZAFFARPUR INSTITUTE OF TECHNOLOGY, MUZAFFARPUR",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "103",
+                "course": "ELECTRICAL ENGINEERING"
+            },
+            {
+                "course_code": "104",
+                "course": "ELECTRONICS & COMMUNICATION ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            },
+            {
+                "course_code": "106",
+                "course": "INFORMATION TECHNOLOGY"
+            },
+            {
+                "course_code": "114",
+                "course": "Chemical Engineering"
+            },
+            {
+                "course_code": "117",
+                "course": "Biomedical and Robotic Engineering"
+            },
+            {
+                "course_code": "165",
+                "course": "Chemical Technology (LEATHER TECHNOLOGY)"
+            }
+        ]
+    },
+    {
+        "college_code": "108",
+        "college_name": "BHAGALPUR COLLEGE OF ENGINEERING, BHAGALPUR",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "103",
+                "course": "ELECTRICAL ENGINEERING"
+            },
+            {
+                "course_code": "104",
+                "course": "ELECTRONICS & COMMUNICATION ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            }
+        ]
+    },
+    {
+        "college_code": "109",
+        "college_name": "NALANDA COLLEGE OF ENGINEERING, CHANDI",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            },
+            {
+                "course_code": "110",
+                "course": "ELECTRICAL & ELECTRONICS ENGINEERING"
+            },
+            {
+                "course_code": "116",
+                "course": "Aeronautical Engineering"
+            },
+            {
+                "course_code": "157",
+                "course": "Computer Science and Engineering (Artificial Intelligence and Machine Learning)"
+            }
+        ]
+    },
+    {
+        "college_code": "110",
+        "college_name": "GAYA COLLEGE OF ENGINEERING, GAYA",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            },
+            {
+                "course_code": "110",
+                "course": "ELECTRICAL & ELECTRONICS ENGINEERING"
+            },
+            {
+                "course_code": "201",
+                "course": "BACHELOR OF ARCHITECTURE"
+            }
+        ]
+    },
+    {
+        "college_code": "111",
+        "college_name": "DARBHANGA COLLEGE OF ENGINEERING, DARBHANGA",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            },
+            {
+                "course_code": "110",
+                "course": "ELECTRICAL & ELECTRONICS ENGINEERING"
+            },
+            {
+                "course_code": "112",
+                "course": "Fire Technology and Safety"
+            },
+            {
+                "course_code": "152",
+                "course": "Computer Science and Engineering (Cyber Security)"
+            }
+        ]
+    },
+    {
+        "college_code": "113",
+        "college_name": "MOTIHARI COLLEGE OF ENGINEERING, MOTIHARI",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            },
+            {
+                "course_code": "110",
+                "course": "ELECTRICAL & ELECTRONICS ENGINEERING"
+            },
+            {
+                "course_code": "119",
+                "course": "Civil Engineering With Computer Application"
+            },
+            {
+                "course_code": "151",
+                "course": "Computer Science and Engineering (Artificial Intelligence)"
+            }
+        ]
+    },
+    {
+        "college_code": "117",
+        "college_name": "LOK NAYAK JAI PRAKASH INSTITUTE OF TECHNOLOGY, CHAPRA",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            },
+            {
+                "course_code": "110",
+                "course": "ELECTRICAL & ELECTRONICS ENGINEERING"
+            },
+            {
+                "course_code": "115",
+                "course": "Food Processing and Preservation"
+            }
+        ]
+    },
+    {
+        "college_code": "118",
+        "college_name": "BUDDHA INSTITUTE OF TECHNOLOGY, GAYA",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "103",
+                "course": "ELECTRICAL ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            }
+        ]
+    },
+    {
+        "college_code": "119",
+        "college_name": "ADWAITA MISSION INSTITUTE OF TECHNOLOGY, BANKA",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            }
+        ]
+    },
+    {
+        "college_code": "122",
+        "college_name": "EXALT COLLEGE OF ENGG. & TECH., VAISHALI",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            }
+        ]
+    },
+    {
+        "college_code": "124",
+        "college_name": "SERSHAH ENGINEERING COLLEGE, SASARAM, ROHTAS",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            },
+            {
+                "course_code": "110",
+                "course": "ELECTRICAL & ELECTRONICS ENGINEERING"
+            },
+            {
+                "course_code": "113",
+                "course": "Mining Engineering"
+            },
+            {
+                "course_code": "159",
+                "course": "ELECTRONICS ENGINEERING(VLSI DESIGN AND TECHNOLOGY)"
+            }
+        ]
+    },
+    {
+        "college_code": "125",
+        "college_name": "RASHTRAKAVI RAMDHARI SINGH DINKAR COLLEGE OF ENGINEERING, BEGUSARAI",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            },
+            {
+                "course_code": "110",
+                "course": "ELECTRICAL & ELECTRONICS ENGINEERING"
+            },
+            {
+                "course_code": "114",
+                "course": "Chemical Engineering"
+            },
+            {
+                "course_code": "153",
+                "course": "Computer Science and Engineering (Data Science)"
+            }
+        ]
+    },
+    {
+        "college_code": "126",
+        "college_name": "BAKHTIYARPUR COLLEGE OF ENGINEERING, PATNA",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            },
+            {
+                "course_code": "110",
+                "course": "ELECTRICAL & ELECTRONICS ENGINEERING"
+            },
+            {
+                "course_code": "112",
+                "course": "Fire Technology and Safety"
+            },
+            {
+                "course_code": "155",
+                "course": "Computer Science and Engineering (Internet of Things)"
+            }
+        ]
+    },
+    {
+        "college_code": "127",
+        "college_name": "SITAMARHI INSTITUTE OF TECHNOLOGY, SITAMARHI",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "103",
+                "course": "ELECTRICAL ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            },
+            {
+                "course_code": "119",
+                "course": "Civil Engineering With Computer Application"
+            },
+            {
+                "course_code": "157",
+                "course": "Computer Science and Engineering (Artificial Intelligence and Machine Learning)"
+            }
+        ]
+    },
+    {
+        "college_code": "130",
+        "college_name": "SUPAUL COLLEGE OF ENGINEERING, SUPAUL",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "103",
+                "course": "ELECTRICAL ENGINEERING"
+            },
+            {
+                "course_code": "104",
+                "course": "ELECTRONICS & COMMUNICATION ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            },
+            {
+                "course_code": "151",
+                "course": "Computer Science and Engineering (Artificial Intelligence)"
+            }
+        ]
+    },
+    {
+        "college_code": "131",
+        "college_name": "PURNEA COLLEGE OF ENGINEERING, PURNEA",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "103",
+                "course": "ELECTRICAL ENGINEERING"
+            },
+            {
+                "course_code": "104",
+                "course": "ELECTRONICS & COMMUNICATION ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            },
+            {
+                "course_code": "151",
+                "course": "Computer Science and Engineering (Artificial Intelligence)"
+            },
+            {
+                "course_code": "161",
+                "course": "MECHATRONICS ENGINEERING"
+            }
+        ]
+    },
+    {
+        "college_code": "132",
+        "college_name": "SAHARSA COLLEGE OF ENGINEERING, SAHARSA",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "103",
+                "course": "ELECTRICAL ENGINEERING"
+            },
+            {
+                "course_code": "104",
+                "course": "ELECTRONICS & COMMUNICATION ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            },
+            {
+                "course_code": "153",
+                "course": "Computer Science and Engineering (Data Science)"
+            }
+        ]
+    },
+    {
+        "college_code": "136",
+        "college_name": "MOTHERS INSTITUTE OF TECHNOLOGY, BIHTA",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            },
+            {
+                "course_code": "110",
+                "course": "ELECTRICAL & ELECTRONICS ENGINEERING"
+            }
+        ]
+    },
+    {
+        "college_code": "141",
+        "college_name": "GOVERNMENT ENGINEERING COLLEGE, NAWADA",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "103",
+                "course": "ELECTRICAL ENGINEERING"
+            },
+            {
+                "course_code": "104",
+                "course": "ELECTRONICS & COMMUNICATION ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            }
+        ]
+    },
+    {
+        "college_code": "142",
+        "college_name": "GOVERNMENT ENGINEERING COLLEGE, KISHANGANJ",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "103",
+                "course": "ELECTRICAL ENGINEERING"
+            },
+            {
+                "course_code": "104",
+                "course": "ELECTRONICS & COMMUNICATION ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            },
+            {
+                "course_code": "157",
+                "course": "Computer Science and Engineering (Artificial Intelligence and Machine Learning)"
+            }
+        ]
+    },
+    {
+        "college_code": "144",
+        "college_name": "GOVERNMENT ENGINEERING COLLEGE, MUNGER",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "103",
+                "course": "ELECTRICAL ENGINEERING"
+            },
+            {
+                "course_code": "151",
+                "course": "Computer Science and Engineering (Artificial Intelligence)"
+            },
+            {
+                "course_code": "153",
+                "course": "Computer Science and Engineering (Data Science)"
+            }
+        ]
+    },
+    {
+        "college_code": "145",
+        "college_name": "GOVERNMENT ENGINEERING COLLEGE, SHEOHAR",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "103",
+                "course": "ELECTRICAL ENGINEERING"
+            },
+            {
+                "course_code": "104",
+                "course": "ELECTRONICS & COMMUNICATION ENGINEERING"
+            },
+            {
+                "course_code": "119",
+                "course": "Civil Engineering With Computer Application"
+            },
+            {
+                "course_code": "153",
+                "course": "Computer Science and Engineering (Data Science)"
+            }
+        ]
+    },
+    {
+        "college_code": "146",
+        "college_name": "GOVERNMENT ENGINEERING COLLEGE, WEST CHAMPARAN",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "103",
+                "course": "ELECTRICAL ENGINEERING"
+            },
+            {
+                "course_code": "104",
+                "course": "ELECTRONICS & COMMUNICATION ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            },
+            {
+                "course_code": "152",
+                "course": "Computer Science and Engineering (Cyber Security)"
+            },
+            {
+                "course_code": "159",
+                "course": "ELECTRONICS ENGINEERING(VLSI DESIGN AND TECHNOLOGY)"
+            }
+        ]
+    },
+    {
+        "college_code": "147",
+        "college_name": "GOVERNMENT ENGINEERING COLLEGE, AURANGABAD",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "103",
+                "course": "ELECTRICAL ENGINEERING"
+            },
+            {
+                "course_code": "104",
+                "course": "ELECTRONICS & COMMUNICATION ENGINEERING"
+            },
+            {
+                "course_code": "153",
+                "course": "Computer Science and Engineering (Data Science)"
+            },
+            {
+                "course_code": "157",
+                "course": "Computer Science and Engineering (Artificial Intelligence and Machine Learning)"
+            }
+        ]
+    },
+    {
+        "college_code": "148",
+        "college_name": "GOVERNMENT ENGINEERING COLLEGE, KAIMUR",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "103",
+                "course": "ELECTRICAL ENGINEERING"
+            },
+            {
+                "course_code": "104",
+                "course": "ELECTRONICS & COMMUNICATION ENGINEERING"
+            },
+            {
+                "course_code": "152",
+                "course": "Computer Science and Engineering (Cyber Security)"
+            },
+            {
+                "course_code": "156",
+                "course": "Computer Science and Engineering (Networks)"
+            }
+        ]
+    },
+    {
+        "college_code": "149",
+        "college_name": "GOVERNMENT ENGINEERING COLLEGE, GOPALGANJ",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "103",
+                "course": "ELECTRICAL ENGINEERING"
+            },
+            {
+                "course_code": "116",
+                "course": "Aeronautical Engineering"
+            },
+            {
+                "course_code": "151",
+                "course": "Computer Science and Engineering (Artificial Intelligence)"
+            },
+            {
+                "course_code": "154",
+                "course": "Computer Science and Engineering (Internet of Things and Cyber Security Including Block Chain Technology)"
+            },
+            {
+                "course_code": "159",
+                "course": "ELECTRONICS ENGINEERING(VLSI DESIGN AND TECHNOLOGY)"
+            }
+        ]
+    },
+    {
+        "college_code": "150",
+        "college_name": "GOVERNMENT ENGINEERING COLLEGE, MADHUBANI",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "103",
+                "course": "ELECTRICAL ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            },
+            {
+                "course_code": "155",
+                "course": "Computer Science and Engineering (Internet of Things)"
+            }
+        ]
+    },
+    {
+        "college_code": "151",
+        "college_name": "GOVERNMENT ENGINEERING COLLEGE, SIWAN",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "103",
+                "course": "ELECTRICAL ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            },
+            {
+                "course_code": "155",
+                "course": "Computer Science and Engineering (Internet of Things)"
+            },
+            {
+                "course_code": "159",
+                "course": "ELECTRONICS ENGINEERING(VLSI DESIGN AND TECHNOLOGY)"
+            }
+        ]
+    },
+    {
+        "college_code": "152",
+        "college_name": "GOVERNMENT ENGINEERING COLLEGE, JEHANABAD",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "103",
+                "course": "ELECTRICAL ENGINEERING"
+            },
+            {
+                "course_code": "104",
+                "course": "ELECTRONICS & COMMUNICATION ENGINEERING"
+            },
+            {
+                "course_code": "152",
+                "course": "Computer Science and Engineering (Cyber Security)"
+            }
+        ]
+    },
+    {
+        "college_code": "153",
+        "college_name": "GOVERNMENT ENGINEERING COLLEGE, ARWAL",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "103",
+                "course": "ELECTRICAL ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            },
+            {
+                "course_code": "153",
+                "course": "Computer Science and Engineering (Data Science)"
+            },
+            {
+                "course_code": "162",
+                "course": "ROBOTICS AND AUTOMATION"
+            }
+        ]
+    },
+    {
+        "college_code": "154",
+        "college_name": "GOVERNMENT ENGINEERING COLLEGE, KHAGARIA",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "103",
+                "course": "ELECTRICAL ENGINEERING"
+            },
+            {
+                "course_code": "155",
+                "course": "Computer Science and Engineering (Internet of Things)"
+            },
+            {
+                "course_code": "157",
+                "course": "Computer Science and Engineering (Artificial Intelligence and Machine Learning)"
+            }
+        ]
+    },
+    {
+        "college_code": "155",
+        "college_name": "GOVERNMENT ENGINEERING COLLEGE, BUXAR",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "103",
+                "course": "ELECTRICAL ENGINEERING"
+            },
+            {
+                "course_code": "104",
+                "course": "ELECTRONICS & COMMUNICATION ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            }
+        ]
+    },
+    {
+        "college_code": "156",
+        "college_name": "GOVERNMENT ENGINEERING COLLEGE, BHOJPUR",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "103",
+                "course": "ELECTRICAL ENGINEERING"
+            },
+            {
+                "course_code": "104",
+                "course": "ELECTRONICS & COMMUNICATION ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            },
+            {
+                "course_code": "125",
+                "course": "ELECTRONICS AND INSTRUMENTION ENGINEERING"
+            }
+        ]
+    },
+    {
+        "college_code": "165",
+        "college_name": "Shri Phanishwar Nath Renu Engineering College, Araria",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "103",
+                "course": "ELECTRICAL ENGINEERING"
+            },
+            {
+                "course_code": "104",
+                "course": "ELECTRONICS & COMMUNICATION ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            },
+            {
+                "course_code": "161",
+                "course": "MECHATRONICS ENGINEERING"
+            }
+        ]
+    },
+    {
+        "college_code": "166",
+        "college_name": "MILLIA KISHANGANJ COLLEGE OF ENGINEERING AND TECHNOLOGY",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            }
+        ]
+    },
+    {
+        "college_code": "167",
+        "college_name": "MILLIA INSTITUTE OF TECHNOLOGY",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "103",
+                "course": "ELECTRICAL ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            }
+        ]
+    },
+    {
+        "college_code": "170",
+        "college_name": "Dr. Ashok Gagan College",
+        "branches": [
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            }
+        ]
+    },
+    {
+        "college_code": "176",
+        "college_name": "Siwan College of Engineering and Management, Siwan",
+        "branches": [
+            {
+                "course_code": "101",
+                "course": "CIVIL ENGINEERING"
+            },
+            {
+                "course_code": "102",
+                "course": "MECHANICAL ENGINEERING"
+            },
+            {
+                "course_code": "103",
+                "course": "ELECTRICAL ENGINEERING"
+            },
+            {
+                "course_code": "105",
+                "course": "COMPUTER SCIENCE & ENGINEERING"
+            }
+        ]
+    }
+]
