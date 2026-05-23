@@ -41,7 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     batchFilter.addEventListener('change', handleFilterChange);
     semesterFilter.addEventListener('change', handleFilterChange);
-    collegeFilter.addEventListener('change', applyFilters);
+    collegeFilter.addEventListener('change', () => {
+        updateBranchDropdown();
+        applyFilters();
+    });
     branchFilter.addEventListener('change', applyFilters);
     sortFilter.addEventListener('change', applyFilters);
     window.addEventListener('resize', () => {
@@ -107,23 +110,26 @@ function isEvenSemester(semStr) {
 async function loadCSVData() {
     loading.classList.remove('d-none');
     
-    indexData = [];
-    KNOWN_BATCHES.forEach(b => {
-        KNOWN_SEMESTERS.forEach(s => {
-            indexData.push({ batch: b, semester: s, file: `${b}_sem${s}.csv` });
-        });
-    });
+    try {
+        const response = await fetch('index.json');
+        if (!response.ok) throw new Error('Failed to load index.json');
+        indexData = await response.json();
+    } catch (e) {
+        console.error(e);
+        indexData = [];
+    }
     
     indexData.sort((a,b) => {
         if(b.batch !== a.batch) return b.batch.localeCompare(a.batch);
-        return parseInt(a.semester) - parseInt(b.semester);
+        return parseInt(b.semester) - parseInt(a.semester);
     });
     
     populateBatchSemesterDropdowns();
     
-    // Default to a specific batch but "All Semesters" if possible to show off the merging
-    batchFilter.value = "2024";
-    semesterFilter.value = ""; // Empty string = All Semesters
+    if (indexData.length > 0) {
+        batchFilter.value = indexData[0].batch;
+        semesterFilter.value = indexData[0].semester;
+    }
     await handleFilterChange();
 }
 
@@ -171,32 +177,25 @@ async function loadMultipleCSVs(filenames) {
     
     // Concurrently fetch all files
     const fetchPromises = filenames.map(async (filename) => {
-        try {
-            const check = await fetch(filename, { method: 'HEAD' });
-            if (!check.ok) return null; // File missing, skip
-            
-            return new Promise((resolve) => {
-                Papa.parse(filename, {
-                    download: true,
-                    header: true,
-                    skipEmptyLines: true,
-                    complete: function(res) {
-                        res.data.forEach(row => {
-                            if(row.regNo) {
-                                row.sgpaNum = parseFloat(row.sgpa) || 0;
-                                row.cgpaNum = parseFloat(row.cgpa) || row.sgpaNum;
-                                row.sourceFile = filename;
-                                allData.push(row);
-                            }
-                        });
-                        resolve(true);
-                    },
-                    error: function() { resolve(false); }
-                });
+        return new Promise((resolve) => {
+            Papa.parse(filename, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(res) {
+                    res.data.forEach(row => {
+                        if(row.regNo) {
+                            row.sgpaNum = parseFloat(row.sgpa) || 0;
+                            row.cgpaNum = parseFloat(row.cgpa) || row.sgpaNum;
+                            row.sourceFile = filename;
+                            allData.push(row);
+                        }
+                    });
+                    resolve(true);
+                },
+                error: function() { resolve(false); }
             });
-        } catch(e) {
-            return null;
-        }
+        });
     });
     
     await Promise.all(fetchPromises);
@@ -886,10 +885,8 @@ function populateSecondaryFilters() {
     });
 
     const currCol = collegeFilter.value;
-    const currBranch = branchFilter.value;
 
     collegeFilter.innerHTML = '<option value="">All Colleges</option>';
-    branchFilter.innerHTML = '<option value="">All Branches</option>';
 
     Array.from(colleges).sort().forEach(c => {
         const opt = document.createElement('option');
@@ -897,12 +894,33 @@ function populateSecondaryFilters() {
         collegeFilter.appendChild(opt);
     });
 
+    if(currCol && colleges.has(currCol)) {
+        collegeFilter.value = currCol;
+    }
+
+    updateBranchDropdown();
+}
+
+function updateBranchDropdown() {
+    const currBranch = branchFilter.value;
+    const branches = new Set();
+    const selectedCollege = collegeFilter.value;
+
+    allData.forEach(row => {
+        if (!selectedCollege || row.college_name === selectedCollege) {
+            if(row.course) branches.add(row.course);
+        }
+    });
+
+    branchFilter.innerHTML = '<option value="">All Branches</option>';
+
     Array.from(branches).sort().forEach(b => {
         const opt = document.createElement('option');
         opt.value = b; opt.textContent = b;
         branchFilter.appendChild(opt);
     });
 
-    if(currCol && colleges.has(currCol)) collegeFilter.value = currCol;
-    if(currBranch && branches.has(currBranch)) branchFilter.value = currBranch;
+    if(currBranch && branches.has(currBranch)) {
+        branchFilter.value = currBranch;
+    }
 }
