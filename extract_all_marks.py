@@ -121,9 +121,20 @@ def main():
 
     print(f"Found {len(btech_exams)} B.Tech exams to process.")
 
-    # Fast path: test only the specific colleges & courses requested or known valid
-    valid_colleges = [102, 103, 106, 107, 108, 109, 110, 111, 113, 117, 118, 119, 122, 123, 124, 125, 130, 144, 146, 170]
-    common_courses = ['101', '102', '105', '110', '151', '119'] # Added 119 for 113
+    # Comprehensive list of BEU College Codes
+    valid_colleges = [
+        102, 103, 106, 107, 108, 109, 110, 111, 113, 117, 118, 119, 122, 123, 124, 125,
+        126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 139, 140, 141, 142, 144,
+        145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 165,
+        166, 167, 169, 170
+    ]
+
+    # Comprehensive list of BEU Branch Codes
+    common_courses = [
+        '101', '102', '103', '104', '105', '106', '107', '110', '111', '112', '113', '114',
+        '115', '116', '117', '118', '119', '124', '125', '151', '152', '153', '154', '155',
+        '156', '157', '158', '159', '160', '161', '162', '163', '164', '165', '166', '167'
+    ]
     sem_roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII']
 
     for exam in btech_exams:
